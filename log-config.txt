@@ -1,0 +1,9 @@
+[DEFAULT]
+logdir = "/tmp/"
+logfilename = "testlog.txt"
+loglevel = "debug"
+
+[runner]
+logdir = "/tmp"
+logfilename="runnerlog.log"
+loglevel = "debug"
