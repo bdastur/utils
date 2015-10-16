@@ -56,3 +56,5 @@ target/
 #VIM Plugins:
 .ropeproject/
 *cscope*
+
+openstack/scripts/setup_config.sh
