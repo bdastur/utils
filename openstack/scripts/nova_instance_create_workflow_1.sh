@@ -102,7 +102,7 @@ fi
 # Now get the port-id from the running instance.
 # 1. First get the private assigned ip for the instance.
 # 2. from the neutron port-list get the port-id associated with this ip.
-PRIVATE_ASSIGNED_IP=`nova show brdtest_instance | grep ${PRIVATE_NET} | \
+PRIVATE_ASSIGNED_IP=`nova show ${INSTANCE_NAME} | grep ${PRIVATE_NET} | \
     awk -F"|" '{print $3}' | tr -d '[[:space:]]'`
 if [ -z "$PRIVATE_ASSIGNED_IP" ]; then
     echo "Private assigned ip.. not present"
