@@ -74,7 +74,7 @@ function delete_floatingip {
 
 function delete_volumes {
 local volumes=($1)
-    if [ -z "$volume_id" ]; then
+    if [ -z "$volumes" ]; then
         echo "No volumeid provided"
     else
         for volume in "${volumes[@]}"
