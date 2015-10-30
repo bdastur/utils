@@ -10,17 +10,8 @@
 set -e
 
 source ./setup_config.sh
+source ./osutils.sh
 
-
-# Get instance from nova list.
-function get_nova_instance_from_list {
-    local instance_name=$1
-    nova_instance=`nova list | grep ${instance_name} | \
-        awk -F"|" '{print $2 }'`
-    if [ ! -z "$nova_instance" ]; then
-        echo $nova_instance 
-    fi
-}
 
 # Get glance id for specific image (name)
 function get_glance_id_from_name {
@@ -31,6 +22,7 @@ function get_glance_id_from_name {
         echo $glance_id
     fi
 }
+
 
 GLANCE_ID=`get_glance_id_from_name ${IMAGE_NAME}`
 echo "GLANCE ID: ${GLANCE_ID}"
@@ -65,7 +57,7 @@ fi
 echo "private: $PRIVATE_NET_ID, pub: $PUBLIC_NET_ID"
 
 
-NOVA_INSTANCE=`get_nova_instance_from_list ${INSTANCE_NAME}`
+NOVA_INSTANCE=`get_instance_id ${INSTANCE_NAME}`
 echo "nova instance found: $NOVA_INSTANCE"
 
 if [ -z "$NOVA_INSTANCE" ]; then
@@ -92,7 +84,7 @@ do
     sleep $pool_timer
 done
 
-NOVA_INSTANCE=`get_nova_instance_from_list ${INSTANCE_NAME}`
+NOVA_INSTANCE=`get_instance_id ${INSTANCE_NAME}`
 echo "nova instance found: $NOVA_INSTANCE"
 if [ -z "$NOVA_INSTANCE" ]; then
     echo "Nova instance not created."

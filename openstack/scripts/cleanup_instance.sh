@@ -29,7 +29,7 @@ function get_instance_volumes {
     local instance_id=$1
     volume_list=(`cinder --os-volume-api-version 1 list | \
         grep ${instance_id} | \
-        awk -F "|" '{print $2 }' | tr -d '[[:space:]]'`)
+        awk -F "|" '{print $2 }'`)
     if [ ! -z "$volume_list" ]; then
         echo $volume_list
     fi
@@ -124,9 +124,12 @@ do
     echo "volume: $volume"
 done
 
-detach_volumes ${INSTANCE_ID} ${VOLUMES}
+# Do not detach volumes: need to check if it is a root volume first.
+#detach_volumes ${INSTANCE_ID} ${VOLUMES}
+
 disassociate_floatingip ${FLOATINGIP}
 delete_instance ${INSTANCE_ID}
+sleep 5
 delete_floatingip ${FLOATINGIP}
 delete_volumes ${VOLUMES}
 
