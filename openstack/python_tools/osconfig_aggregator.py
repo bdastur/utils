@@ -7,8 +7,8 @@ Openstack configuration aggregator.
 
 import yaml
 import paramiko
-#import scp
-#import os
+import scp
+import os
 import argparse
 
 
@@ -101,15 +101,49 @@ class FileHandler(object):
         return password
 
 
+def create_local_path(filehandle,
+                      server):
+    '''
+    Create local directory
+    '''
+    local_root = filehandle.get_parsed_data(["LOCAL_ROOT"])
+
+    # Create local staging folder.
+    if not os.path.exists(local_root):
+        os.mkdir(local_root)
+
+    svr_path = os.path.join(local_root, server['ssh_ip'])
+    if not os.path.exists(svr_path):
+        os.mkdir(svr_path)
+
+    local_staging_folder = svr_path
+
+    return local_staging_folder
+
+
 def get_service_configuration(filehandle,
+                              server,
                               sshclient):
     '''
     Generic service configuration generator
     '''
     service_list = filehandle.get_parsed_data(["SERVICES"])
-    local_root = filehandle.get_parsed_data(["LOCAL_ROOT"])
+    local_staging_folder = create_local_path(filehandle, server)
 
-    print "service list: ", service_list, local_root
+    print "service list: ", service_list, local_staging_folder
+    for service in service_list:
+        service_config_path = service.get('configpath')
+        service_name = service.get('name')
+        if service_config_path is None or service_name is None:
+            print "Service config incorrect [%s]", service
+            continue
+
+        service_local_path = os.path.join(local_staging_folder, service_name)
+
+        scpclient = scp.SCPClient(sshclient.get_transport())
+        scpclient.get(service_config_path,
+                      local_path=service_local_path,
+                      recursive=True)
 
 
 def create_ssh_connection(server, username, password):
@@ -159,7 +193,7 @@ def main():
         if not sshclient:
             print "cannot connect to %s " % server['ssh_ip']
 
-        get_service_configuration(filehandle, sshclient)
+        get_service_configuration(filehandle, server, sshclient)
 
 
 
