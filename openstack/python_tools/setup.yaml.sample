@@ -1,0 +1,21 @@
+USERNAME: foo 
+PASSWORD: bar 
+LOCAL_ROOT: "./configs"
+
+SERVERS:
+  -
+      ssh_ip: "1.1.4.4"
+      role: controller
+  -
+      ssh_ip: "1.1.4.8"
+      role: controller
+  -
+      ssh_ip: "1.1.4.2"
+      role: controller
+
+SERVICES:
+  -
+    name: rabbitmq
+    configpath: /etc/rabbitmq
+
+

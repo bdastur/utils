@@ -58,3 +58,4 @@ target/
 *cscope*
 
 openstack/scripts/setup_config.sh
+openstack/python_tools/setup.yaml
