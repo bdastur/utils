@@ -4,18 +4,21 @@ LOCAL_ROOT: "./configs"
 
 SERVERS:
   -
-      ssh_ip: "1.1.4.4"
-      role: controller
+      ssh_ip: "<ssh ip address>"
+      role: controller|compute|storage
   -
-      ssh_ip: "1.1.4.8"
-      role: controller
+      ssh_ip: "<ssh ip address>"
+      role: controller|compute|storage
   -
-      ssh_ip: "1.1.4.2"
-      role: controller
+      ssh_ip: "<ssh ip address>"
+      role: controller|compute|storage
 
 SERVICES:
   -
     name: rabbitmq
     configpath: /etc/rabbitmq
+  - 
+    name: mysql
+    configpath: /etc/mysql
 
 

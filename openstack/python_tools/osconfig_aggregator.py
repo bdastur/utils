@@ -10,6 +10,7 @@ import paramiko
 import scp
 import os
 import argparse
+import datetime
 
 
 class FileHandler(object):
@@ -24,12 +25,12 @@ class FileHandler(object):
         self.yamlfile = filename
         self.parsed = None
         try:
-            fp = open(self.yamlfile)
+            fhandle = open(self.yamlfile)
         except IOError:
             print "Failed to read %s" % self.yamlfile
             return
         try:
-            self.parsed = yaml.safe_load(fp)
+            self.parsed = yaml.safe_load(fhandle)
         except yaml.parser.ParserError as parse_err:
             print "Failed to parse %s [%s]" % (self.yamlfile, parse_err)
             return
@@ -74,7 +75,7 @@ class FileHandler(object):
         '''
         Return the server list
         '''
-        return (self.get_parsed_data(["SERVERS"]))
+        return self.get_parsed_data(["SERVERS"])
 
     def get_server_username(self, server):
         '''
@@ -139,6 +140,14 @@ def get_service_configuration(filehandle,
             continue
 
         service_local_path = os.path.join(local_staging_folder, service_name)
+        if os.path.exists(service_local_path):
+            print "%s already present" % service_local_path
+            curtime = datetime.datetime.now()
+            timestamp = str(curtime.year) + str(curtime.month) + \
+                str(curtime.day) + str(curtime.hour) + str(curtime.minute)
+            service_name = service_name + "_" + timestamp
+            service_local_path = os.path.join(
+                local_staging_folder, service_name)
 
         scpclient = scp.SCPClient(sshclient.get_transport())
         scpclient.get(service_config_path,
@@ -194,14 +203,6 @@ def main():
             print "cannot connect to %s " % server['ssh_ip']
 
         get_service_configuration(filehandle, server, sshclient)
-
-
-
-
-    #print fh.get_parsed_data(["SERVERS"])
-    #print fh.get_parsed_data(["SERVERS", "server1", "ssh_ip"])
-    #print fh.get_parsed_data(["SERVERS", "server1", "ssh_i"])
-
 
 
 if __name__ == '__main__':
