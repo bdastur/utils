@@ -14,6 +14,10 @@ def parse_fio_file(filename):
     '''
     Parse the file and return a json object
     '''
+    # This is how we define a measurement pattern.
+    # (decimal number followed by Units or Units/time )
+    msmt_str = r"(\d*\.\d+|\d+)(\w+|\w+/\w+)"
+
     job_pattern = r"job.* rw=(\w+).* bs=(\w+)-.* ioengine=(\w+).* iodepth=(\w+)"
     fio_version = r"fio-(.*)"
     job1_pattern = r"job.* pid=(\w+):(.*)"
@@ -24,6 +28,13 @@ def parse_fio_file(filename):
         ".*max=(.*),.*avg=(.*),.*stdev=(.*)"
     bw_pattern = r".*bw.*\(.*\):.*min=(.*),.*max=(.*)," + \
         ".*per=(.*),.*avg=(.*),.*stdev=(.*)"
+    cpu_pattern = r".*cpu.*:.*usr=(.*)%,.*sys=(.*)%," + \
+        ".*ctx=(.*),.*majf=(.*),.*minf=(.*)"
+    write_aggr_pattern = r".*WRITE:.*io=%s,.*aggrb=%s,.*minb=%s.*" \
+        "maxb=%s,.*mint=%s,.*maxt=%s.*" % \
+        (msmt_str, msmt_str, msmt_str, msmt_str, msmt_str, msmt_str)
+
+    print "write agg: ", write_aggr_pattern
 
     job_comp_pattern = re.compile(job_pattern)
     fio_comp_version = re.compile(fio_version)
@@ -32,6 +43,8 @@ def parse_fio_file(filename):
     clat_comp_pattern = re.compile(clat_pattern)
     lat_comp_pattern = re.compile(lat_pattern)
     bw_comp_pattern = re.compile(bw_pattern)
+    cpu_comp_pattern = re.compile(cpu_pattern)
+    write_aggr_comp_pattern = re.compile(write_aggr_pattern)
 
     fhandle = open(filename, 'r')
     data = fhandle.read()
@@ -66,6 +79,16 @@ def parse_fio_file(filename):
         mobj = bw_comp_pattern.match(line)
         if mobj:
             print "bw: ", line
+            print mobj.groups(0)
+
+        mobj = cpu_comp_pattern.match(line)
+        if mobj:
+            print "cpu: ", line
+            print mobj.groups(0)
+
+        mobj = write_aggr_comp_pattern.match(line)
+        if mobj:
+            print "aggr write: ", line
             print mobj.groups(0)
 
 
