@@ -8,9 +8,122 @@ Parse FIO output:
 import os
 import argparse
 import re
+import rex
+
 
 
 def parse_fio_file(filename):
+    '''
+    Parse the FIO output and return a
+    dict
+    '''
+    job_pattern = r"job.*rw=(w:<type>).*bs=(w:<blocksize>)-.*" \
+        "ioengine=(w:<ioengine>).*iodepth=(d:<iodepth>)"
+    job_rex_pattern = rex.reformat_pattern(job_pattern, compile=True)
+
+    job1_pattern = r"job.* pid=(d:<pid>):(any:<timestamp>)"
+    job1_rex_pattern = rex.reformat_pattern(job1_pattern, compile=True)
+
+    read_aggr_pattern = r".*READ:.*io=(measurement:<io>),.*" \
+        "aggrb=(measurement:<aggrbw>),.*minb=(measurement:<minavgbw>),.*" \
+        "maxb=(measurement:<maxavgbw>),.*mint=(measurement:<minruntime>),.*" \
+        "maxt=(measurement:<maxruntime>)"
+    read_aggr_rex_pattern = rex.reformat_pattern(read_aggr_pattern,
+                                                 compile=True)
+
+    write_aggr_pattern = r".*WRITE:.*io=(measurement:<io>),.*" \
+        "aggrb=(measurement:<aggrbw>),.*minb=(measurement:<minavgbw>),.*" \
+        "maxb=(measurement:<maxavgbw>),.*mint=(measurement:<minruntime>),.*" \
+        "maxt=(measurement:<maxruntime>)"
+    write_aggr_rex_pattern = rex.reformat_pattern(write_aggr_pattern,
+                                                  compile=True)
+
+    cpu_pattern = r".*cpu.*:.*usr=(decimal:<user>)%,.*" \
+        "sys=(decimal:<system>)%,.*ctx=(d:<context_switches>),.*" \
+        "majf=(d:<majfault>),.*minf=(d:<minfault>)"
+    cpu_rex_pattern = rex.reformat_pattern(cpu_pattern, compile=True)
+
+
+    fhandle = open(filename, 'r')
+    data = fhandle.read()
+    fio_result = {}
+    for line in data.splitlines():
+        mobj = job_rex_pattern.match(line)
+        if mobj:
+            print "job pattern: ", line
+            print "match: ", mobj.groups(0)
+            fio_result['blocksize'] = mobj.group('blocksize')
+            fio_result['jobtype'] = mobj.group('type')
+            fio_result['ioengine'] = mobj.group('ioengine')
+            fio_result['iodepth'] = mobj.group('iodepth')
+
+        mobj = job1_rex_pattern.match(line)
+        if mobj:
+            print "job1 pattern: ", line
+            print "match: ", mobj.groups(0)
+            fio_result['pid'] = mobj.group('pid')
+            fio_result['timestamp'] = mobj.group('timestamp')
+
+        mobj = read_aggr_rex_pattern.match(line)
+        if mobj:
+            print "Read aggr: ", line
+            print "match: ", mobj.groups(0)
+            fio_result['aggr_read'] = {}
+            fio_result['aggr_read']['io'] = mobj.group('io')
+            fio_result['aggr_read']['io_unit'] = mobj.group('io_unit')
+            fio_result['aggr_read']['aggrbw'] = mobj.group('aggrbw')
+            fio_result['aggr_read']['aggrbw_unit'] = mobj.group('aggrbw_unit')
+            fio_result['aggr_read']['minavgbw'] = mobj.group('minavgbw')
+            fio_result['aggr_read']['minavgbw_unit'] = \
+                mobj.group('minavgbw_unit')
+            fio_result['aggr_read']['maxavgbw'] = mobj.group('maxavgbw')
+            fio_result['aggr_read']['maxavgbw_unit'] = \
+                mobj.group('maxavgbw_unit')
+            fio_result['aggr_read']['minruntime'] = mobj.group('minruntime')
+            fio_result['aggr_read']['minruntime_unit'] = \
+                mobj.group('minruntime_unit')
+            fio_result['aggr_read']['maxruntime'] = mobj.group('maxruntime')
+            fio_result['aggr_read']['maxruntime_unit'] = \
+                mobj.group('maxruntime_unit')
+
+        mobj = write_aggr_rex_pattern.match(line)
+        if mobj:
+            print "Write aggr: ", line
+            print "match: ", mobj.groups(0)
+            fio_result['aggr_write'] = {}
+            fio_result['aggr_write']['io'] = mobj.group('io')
+            fio_result['aggr_write']['io_unit'] = mobj.group('io_unit')
+            fio_result['aggr_write']['aggrbw'] = mobj.group('aggrbw')
+            fio_result['aggr_write']['aggrbw_unit'] = mobj.group('aggrbw_unit')
+            fio_result['aggr_write']['minavgbw'] = mobj.group('minavgbw')
+            fio_result['aggr_write']['minavgbw_unit'] = \
+                mobj.group('minavgbw_unit')
+            fio_result['aggr_write']['maxavgbw'] = mobj.group('maxavgbw')
+            fio_result['aggr_write']['maxavgbw_unit'] = \
+                mobj.group('maxavgbw_unit')
+            fio_result['aggr_write']['minruntime'] = mobj.group('minruntime')
+            fio_result['aggr_write']['minruntime_unit'] = \
+                mobj.group('minruntime_unit')
+            fio_result['aggr_write']['maxruntime'] = mobj.group('maxruntime')
+            fio_result['aggr_write']['maxruntime_unit'] = \
+                mobj.group('maxruntime_unit')
+
+        mobj = cpu_rex_pattern.match(line)
+        if mobj:
+            print "cpu pattern: ", line
+            print "match: ", mobj.groups(0)
+            fio_result['cpu_usage'] = {}
+            fio_result['cpu_usage']['user'] = mobj.group('user')
+            fio_result['cpu_usage']['system'] = mobj.group('system')
+            fio_result['cpu_usage']['context_switches'] =  \
+                mobj.group('context_switches')
+            fio_result['cpu_usage']['majfault'] = mobj.group('majfault')
+            fio_result['cpu_usage']['minfault'] = mobj.group('minfault')
+
+    return fio_result
+
+
+def parse_fio_file_old(filename):
     '''
     Parse the file and return a json object
     '''
@@ -58,6 +171,7 @@ def parse_fio_file(filename):
     for line in data.splitlines():
         mobj = job_comp_pattern.match(line)
         if mobj:
+            print "job pattern: ", line
             print mobj.groups(0)
 
         mobj = fio_comp_version.match(line)
@@ -135,8 +249,11 @@ def parse_fio_output_files(namespace):
     if not validate_filelist(filelist):
         return None
 
+    results = []
     for filename in filelist:
-        parse_fio_file(filename)
+        results.append(parse_fio_file(filename))
+
+    print "Results: ", results
 
 
 
