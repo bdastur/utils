@@ -7,12 +7,11 @@ Parse FIO output:
 '''
 import os
 import argparse
-import re
 import rex
+import prettytable
 
 
-
-def parse_fio_file(filename):
+def parse_fio_file(filename, verbose=False):
     '''
     Parse the FIO output and return a
     dict
@@ -50,8 +49,9 @@ def parse_fio_file(filename):
     for line in data.splitlines():
         mobj = job_rex_pattern.match(line)
         if mobj:
-            print "job pattern: ", line
-            print "match: ", mobj.groups(0)
+            if verbose:
+                print "job pattern: ", line
+                print "match: ", mobj.groups(0)
             fio_result['blocksize'] = mobj.group('blocksize')
             fio_result['jobtype'] = mobj.group('type')
             fio_result['ioengine'] = mobj.group('ioengine')
@@ -59,15 +59,17 @@ def parse_fio_file(filename):
 
         mobj = job1_rex_pattern.match(line)
         if mobj:
-            print "job1 pattern: ", line
-            print "match: ", mobj.groups(0)
+            if verbose:
+                print "job1 pattern: ", line
+                print "match: ", mobj.groups(0)
             fio_result['pid'] = mobj.group('pid')
             fio_result['timestamp'] = mobj.group('timestamp')
 
         mobj = read_aggr_rex_pattern.match(line)
         if mobj:
-            print "Read aggr: ", line
-            print "match: ", mobj.groups(0)
+            if verbose:
+                print "Read aggr: ", line
+                print "match: ", mobj.groups(0)
             fio_result['aggr_read'] = {}
             fio_result['aggr_read']['io'] = mobj.group('io')
             fio_result['aggr_read']['io_unit'] = mobj.group('io_unit')
@@ -88,8 +90,9 @@ def parse_fio_file(filename):
 
         mobj = write_aggr_rex_pattern.match(line)
         if mobj:
-            print "Write aggr: ", line
-            print "match: ", mobj.groups(0)
+            if verbose:
+                print "Write aggr: ", line
+                print "match: ", mobj.groups(0)
             fio_result['aggr_write'] = {}
             fio_result['aggr_write']['io'] = mobj.group('io')
             fio_result['aggr_write']['io_unit'] = mobj.group('io_unit')
@@ -110,8 +113,9 @@ def parse_fio_file(filename):
 
         mobj = cpu_rex_pattern.match(line)
         if mobj:
-            print "cpu pattern: ", line
-            print "match: ", mobj.groups(0)
+            if verbose:
+                print "cpu pattern: ", line
+                print "match: ", mobj.groups(0)
             fio_result['cpu_usage'] = {}
             fio_result['cpu_usage']['user'] = mobj.group('user')
             fio_result['cpu_usage']['system'] = mobj.group('system')
@@ -121,106 +125,6 @@ def parse_fio_file(filename):
             fio_result['cpu_usage']['minfault'] = mobj.group('minfault')
 
     return fio_result
-
-
-def parse_fio_file_old(filename):
-    '''
-    Parse the file and return a json object
-    '''
-    # This is how we define a measurement pattern.
-    # (decimal number followed by Units or Units/time )
-    decimal_str = r"(\d*\.\d+|\d+)"
-    msmt_str = r"(\d*\.\d+|\d+)(\w+|\w+/\w+)"
-
-    job_pattern = r"job.* rw=(\w+).* bs=(\w+)-.* ioengine=(\w+).* iodepth=(\w+)"
-    fio_version = r"fio-(.*)"
-    job1_pattern = r"job.* pid=(\w+):(.*)"
-    write_pattern = r".*write: .*io=(\w+),.*bw=(.*),.*iops=(\w+),.*runt=(.*)"
-    clat_pattern = r".*clat.*\(usec\):.*min=(\w+)," + \
-        ".*max=(\w+).*avg=(.*),.*stdev=(.*)"
-    lat_pattern = r".*lat.*\(usec\):.*min=(.*)," + \
-        ".*max=(.*),.*avg=(.*),.*stdev=(.*)"
-    bw_pattern = r".*bw.*\(.*\):.*min=(.*),.*max=(.*)," + \
-        ".*per=(.*),.*avg=(.*),.*stdev=(.*)"
-    cpu_pattern = r".*cpu.*:.*usr=(.*)%,.*sys=(.*)%," + \
-        ".*ctx=(.*),.*majf=(.*),.*minf=(.*)"
-    write_aggr_pattern = r".*WRITE:.*io=%s,.*aggrb=%s,.*minb=%s.*" \
-        "maxb=%s,.*mint=%s,.*maxt=%s.*" % \
-        (msmt_str, msmt_str, msmt_str, msmt_str, msmt_str, msmt_str)
-    read_aggr_pattern = r".*READ: io=%s,.*aggrb=%s,.*minb=%s,.*" \
-        "maxb=%s,.*mint=%s,.*maxt=%s.*" % \
-        (msmt_str, msmt_str, msmt_str, msmt_str, msmt_str, msmt_str)
-
-    disk_stat_pattern = r" *(\w+):.*ios=(\w+)/(\w+),.*merge=(\w+)/(\w+),.*" \
-        "ticks=(\w+)/(\w+),.*in_queue=(\w+),.*util=%s.*" % decimal_str
-
-    job_comp_pattern = re.compile(job_pattern)
-    fio_comp_version = re.compile(fio_version)
-    job1_comp_pattern = re.compile(job1_pattern)
-    write_comp_pattern = re.compile(write_pattern)
-    clat_comp_pattern = re.compile(clat_pattern)
-    lat_comp_pattern = re.compile(lat_pattern)
-    bw_comp_pattern = re.compile(bw_pattern)
-    cpu_comp_pattern = re.compile(cpu_pattern)
-    write_aggr_comp_pattern = re.compile(write_aggr_pattern)
-    read_aggr_comp_pattern = re.compile(read_aggr_pattern)
-    disk_stat_comp_pattern = re.compile(disk_stat_pattern)
-
-    fhandle = open(filename, 'r')
-    data = fhandle.read()
-    for line in data.splitlines():
-        mobj = job_comp_pattern.match(line)
-        if mobj:
-            print "job pattern: ", line
-            print mobj.groups(0)
-
-        mobj = fio_comp_version.match(line)
-        if mobj:
-            print mobj.groups(0)
-
-        mobj = job1_comp_pattern.match(line)
-        if mobj:
-            print "line: ", line
-            print mobj.groups(0)
-
-        mobj = write_comp_pattern.match(line)
-        if mobj:
-            print mobj.groups(0)
-
-        mobj = clat_comp_pattern.match(line)
-        if mobj:
-            print "clat: ", line
-            print mobj.groups(0)
-
-        mobj = lat_comp_pattern.match(line)
-        if mobj:
-            print "lat: ", line
-            print mobj.groups(0)
-
-        mobj = bw_comp_pattern.match(line)
-        if mobj:
-            print "bw: ", line
-            print mobj.groups(0)
-
-        mobj = cpu_comp_pattern.match(line)
-        if mobj:
-            print "cpu: ", line
-            print mobj.groups(0)
-
-        mobj = write_aggr_comp_pattern.match(line)
-        if mobj:
-            print "aggr write: ", line
-            print mobj.groups(0)
-
-        mobj = read_aggr_comp_pattern.match(line)
-        if mobj:
-            print "read aggr: ", line
-            print mobj.groups(0)
-
-        mobj = disk_stat_comp_pattern.match(line)
-        if mobj:
-            print "disk stat: ", line
-            print mobj.groups(0)
 
 
 def validate_filelist(filelist):
@@ -240,21 +144,70 @@ def validate_filelist(filelist):
     return True
 
 
+def display_fiodata_tabular(fioresults):
+    '''
+    Given the fioresults data, print it in
+    tabular format.
+    '''
+
+    # Setup table.
+    table_header = ["test", "ioengine", "size",
+                    "Write (IO)", "Write (BW)",
+                    "Read (IO)", "Read (BW)"]
+    table = prettytable.PrettyTable(table_header)
+
+    for result in fioresults:
+        row = []
+        row.append(result['jobtype'])
+        row.append(result['ioengine'])
+        row.append(result['blocksize'])
+
+        try:
+            iostr = result['aggr_write']['io'] + " " + \
+                result['aggr_write']['io_unit']
+        except KeyError:
+            iostr = "X"
+        row.append(iostr)
+
+        try:
+            bwstr = result['aggr_write']['aggrbw'] + " " + \
+                result['aggr_write']['aggrbw_unit']
+        except KeyError:
+            bwstr = "X"
+        row.append(bwstr)
+
+        try:
+            iostr = result['aggr_read']['io'] + " " + \
+                result['aggr_read']['io_unit']
+        except KeyError:
+            iostr = "X"
+        row.append(iostr)
+
+        try:
+            bwstr = result['aggr_read']['aggrbw'] + " " + \
+                result['aggr_read']['aggrbw_unit']
+        except KeyError:
+            bwstr = "X"
+        row.append(bwstr)
+
+        table.add_row(row)
+
+    print table
+
+
 def parse_fio_output_files(namespace):
     '''
     Read all the files for fio_data and parse them.
     '''
     filelist = namespace.output
-    print "filelist: ", filelist
     if not validate_filelist(filelist):
         return None
 
     results = []
     for filename in filelist:
-        results.append(parse_fio_file(filename))
+        results.append(parse_fio_file(filename, verbose=namespace.verbose))
 
-    print "Results: ", results
-
+    display_fiodata_tabular(results)
 
 
 def parse_arguments():
@@ -268,15 +221,17 @@ def parse_arguments():
                         required=True,
                         nargs='*',
                         help="FIO output files to parse")
+    parser.add_argument("-v", "--verbose",
+                        required=False,
+                        action="store_true",
+                        help="Enable Verbose")
 
     namespace = parser.parse_args()
     return namespace
 
 
 def main():
-    print "fio parse main"
     namespace = parse_arguments()
-    print namespace
     parse_fio_output_files(namespace)
 
 if __name__ == '__main__':
