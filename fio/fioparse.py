@@ -16,6 +16,7 @@ def parse_fio_file(filename):
     '''
     # This is how we define a measurement pattern.
     # (decimal number followed by Units or Units/time )
+    decimal_str = r"(\d*\.\d+|\d+)"
     msmt_str = r"(\d*\.\d+|\d+)(\w+|\w+/\w+)"
 
     job_pattern = r"job.* rw=(\w+).* bs=(\w+)-.* ioengine=(\w+).* iodepth=(\w+)"
@@ -33,8 +34,12 @@ def parse_fio_file(filename):
     write_aggr_pattern = r".*WRITE:.*io=%s,.*aggrb=%s,.*minb=%s.*" \
         "maxb=%s,.*mint=%s,.*maxt=%s.*" % \
         (msmt_str, msmt_str, msmt_str, msmt_str, msmt_str, msmt_str)
+    read_aggr_pattern = r".*READ: io=%s,.*aggrb=%s,.*minb=%s,.*" \
+        "maxb=%s,.*mint=%s,.*maxt=%s.*" % \
+        (msmt_str, msmt_str, msmt_str, msmt_str, msmt_str, msmt_str)
 
-    print "write agg: ", write_aggr_pattern
+    disk_stat_pattern = r" *(\w+):.*ios=(\w+)/(\w+),.*merge=(\w+)/(\w+),.*" \
+        "ticks=(\w+)/(\w+),.*in_queue=(\w+),.*util=%s.*" % decimal_str
 
     job_comp_pattern = re.compile(job_pattern)
     fio_comp_version = re.compile(fio_version)
@@ -45,6 +50,8 @@ def parse_fio_file(filename):
     bw_comp_pattern = re.compile(bw_pattern)
     cpu_comp_pattern = re.compile(cpu_pattern)
     write_aggr_comp_pattern = re.compile(write_aggr_pattern)
+    read_aggr_comp_pattern = re.compile(read_aggr_pattern)
+    disk_stat_comp_pattern = re.compile(disk_stat_pattern)
 
     fhandle = open(filename, 'r')
     data = fhandle.read()
@@ -91,6 +98,16 @@ def parse_fio_file(filename):
             print "aggr write: ", line
             print mobj.groups(0)
 
+        mobj = read_aggr_comp_pattern.match(line)
+        if mobj:
+            print "read aggr: ", line
+            print mobj.groups(0)
+
+        mobj = disk_stat_comp_pattern.match(line)
+        if mobj:
+            print "disk stat: ", line
+            print mobj.groups(0)
+
 
 def validate_filelist(filelist):
     '''
@@ -99,8 +116,11 @@ def validate_filelist(filelist):
         true: if all files exist
         false: if any check fails
     '''
+
     for filename in filelist:
-        if not os.path.exists(filename):
+        if not os.path.exists(filename) or \
+                os.path.isdir(filename):
+            print "Invalid file [%s]" % filename
             return False
 
     return True
