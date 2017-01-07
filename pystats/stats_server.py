@@ -14,7 +14,6 @@ Mandator keys:
 For Metric type counter:
    mandator key: 'count'
 
-
 """
 import sys
 import os
@@ -74,9 +73,7 @@ class MetricsManager(object):
 
 class UDPServer(object):
     """
-    test Docstring
-
-    test
+    Stats UDP Server.
     """
 
     BUFSIZE = 1024
@@ -143,8 +140,6 @@ def main():
     """Main Function"""
     statserver = StatsServer()
     statserver.run()
-
-
 
 
 if __name__ == '__main__':
