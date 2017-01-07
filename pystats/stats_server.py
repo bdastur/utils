@@ -17,11 +17,67 @@ For Metric type counter:
 """
 import sys
 import os
+import time
 import signal
 import socket
 import json
 import multiprocessing
+import hashlib
 
+class KafkaPublisher(object):
+    pass
+
+
+class StatsForwarder(object):
+    DEFAULT_INTERVAL = 60
+    FORWARDERS = {
+        'kafka': 'KafkaPublisher',
+        'logstash': 'LogstashForwarder'
+    }
+
+    def __init__(self):
+        self.interval = StatsForwarder.DEFAULT_INTERVAL
+
+    def start(self):
+        while True:
+            print "Forwarded Wokeup"
+            # Perform Action.
+            time.sleep(self.interval)
+
+
+
+class TraceMetric(object):
+    """
+    Manage metric_type: TraceMetric
+    """
+
+    def __init__(self, jdata):
+        self.metric_name = jdata['metric_name']
+        self.metric_type = jdata['metric_type']
+        self.trace_info = {}
+
+    def update_metric(self, jdata):
+        hashstr = ""
+        traceobj = {}
+        for key in jdata:
+            # skip metric_name and type, copy rest.
+            if key in ['metric_name', 'metric_type']:
+                continue
+            traceobj[key] = jdata[key]
+            hashstr += key + jdata[key]
+
+        objhash = hashlib.md5(hashstr)
+        hash_key = objhash.hexdigest()
+
+        if self.trace_info.get(hash_key, None) is None:
+            self.trace_info[hash_key] = traceobj
+            self.trace_info[hash_key]['count'] = 1
+        else:
+            self.trace_info[hash_key]['count'] += 1
+
+
+    def display_metric_info(self):
+        print "Name: %s Traceinfo: %s " % (self.metric_name, self.trace_info)
 
 class CounterMetric(object):
     def __init__(self, jdata):
@@ -49,13 +105,9 @@ class MetricsManager(object):
     def init_metric(self, jdata):
         metric_name = jdata['metric_name']
         metric_type = jdata['metric_type']
-        # if jdata['metric_type'] == "counter":
-        #     self.metrics[metric_name] = Metric(jdata)
-        print "sys modules: ", sys.modules.keys()
 
         metric_cls = getattr(sys.modules['__main__'],
                       MetricsManager.METRIC_TYPES[metric_type])
-        print "metric cls: ", metric_cls
         self.metrics[metric_name] = metric_cls(jdata)
 
     def add_metric(self, jdata):
@@ -96,7 +148,6 @@ class UDPServer(object):
             except KeyboardInterrupt:
                 print "KeyboardInterrupt: Terminate Server!"
                 sys.exit()
-            print "Data: ", data
             try:
                 jdata = json.loads(data)
             except ValueError:
@@ -104,7 +155,6 @@ class UDPServer(object):
                 continue
 
             metricsm.add_metric(jdata)
-
             metricsm.display_metric_info(jdata)
 
 
@@ -115,7 +165,10 @@ class StatsServer(object):
         # TODO: catch exception
         self.bind_port = int(os.environ.get('STATSD_BIND_PORT', 5090))
 
+        self.udpserver = None
         self.udpworker = None
+        self.forwarder = None
+        self.fwdworker = None
 
         # Handle Keyboard Interrupt
         signal.signal(signal.SIGINT, self._handle_sigterm)
@@ -125,14 +178,26 @@ class StatsServer(object):
         self.udpworker.terminate()
         print "UDP Server Terminated!"
 
+        self.fwdworker.terminate()
+        print "Fowarder Terminated!"
+
     def udpserver_initiate(self):
         self.udpserver = UDPServer(self.bind_ip, self.bind_port)
         self.udpserver.start_listener()
+
+    def forwarder_initiate(self):
+        self.forwarder = StatsForwarder()
+        self.forwarder.start()
 
     def run(self):
         self.udpworker = multiprocessing.Process(target=self.udpserver_initiate)
         self.udpworker.start()
         print "UDP Server Started!"
+
+        self.fwdworker = multiprocessing.Process(target=self.forwarder_initiate)
+        self.fwdworker.start()
+        print "Fowarder Started!"
+
 
 
 
