@@ -5,6 +5,7 @@
 import socket
 import time
 import os
+import random
 
 
 class UDPClient(object):
@@ -30,14 +31,23 @@ def main():
 
     client = UDPClient(remote_addr, remote_port)
 
-    msg = '{"stat_type": "single_stat", "metric_name": "cpu", "value": "test"}'
-    """{'metricname', '1000', '43', metric_type:counter}"""
+    msgs = []
+
     msg = '{"metric_name": "cfbroker.app_trace", \
     "metric_type": "counter", "count": "1"}'
+    msg1 = '{"metric_name": "cfbroker.trace", "metric_type": "trace", \
+    "username": "behzad_dastur", "stage": "initialize"}'
+    msg2 = '{"metric_name": "cfbroker.trace", "metric_type": "trace", \
+    "username": "behzad_dastur", "stage": "error"}'
+    msgs.append(msg)
+    msgs.append(msg1)
+    msgs.append(msg2)
+
     for count in range(0, 1000):
         if count % 50 == 0:
             time.sleep(1)
 
+        msg = msgs[random.randrange(3)]
         client.send_msg(msg)
 
 
