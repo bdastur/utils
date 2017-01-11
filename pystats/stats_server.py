@@ -104,8 +104,21 @@ class StatsForwarder(object):
                 print "No data. Continue"
                 continue
 
-            if objdata is not None:
-                print "Forward data: ", objdata
+            # Forward metrics.
+            if objdata['metric_type'] == "trace":
+                self.forward_trace_metrics(objdata)
+
+    def forward_trace_metrics(self, objdata):
+        metric_name = objdata['metric_name']
+        tags = {}
+        for key in objdata['trace_info'].keys():
+            value = objdata['trace_info'][key]['count']
+            for tag in objdata['trace_info'][key].keys():
+                if tag == "count":
+                    continue
+                tags[tag] = objdata['trace_info'][key][tag]
+            #self.forwarders['kafka'].forward_metrics(metric_name, value, tags)
+            print "Forward to kafka: ", metric_name, value, tags
 
 class TraceMetric(object):
     """
@@ -178,6 +191,7 @@ class MetricsManager(object):
         self.metrics = {}
         self.queue = common_queue
         self.db = ShelveDB()
+        self.last_sent_trace = []
 
     def init_metric(self, jdata):
         metric_name = jdata['metric_name']
@@ -215,11 +229,25 @@ class MetricsManager(object):
             self.queue.put(metric_name)
 
     def forward_metrics(self):
-        print "Forward Metrics"
         for metric_name in self.metrics.keys():
-            print "Put all metrics"
             metricobj = self.metrics[metric_name].get_metric_info()
+
+            hashstr = str(metricobj)
+            objhash = hashlib.md5(hashstr)
+            hash_key = objhash.hexdigest()
+            if hash_key in self.last_sent_trace:
+                print "(%d) skip sending: %s" % \
+                (len(self.last_sent_trace), hash_key)
+                continue
+
             self.queue.put(metricobj)
+            self.last_sent_trace.append(hash_key)
+
+            # Keep only the last n(10) elements in this list.
+            # as it is unlikely anything more than that has not been sent.
+            length = len(self.last_sent_trace)
+            if length > 10:
+                self.last_sent_trace.pop(0)
 
 
 class UDPServer(object):
