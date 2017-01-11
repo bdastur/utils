@@ -24,6 +24,8 @@ import json
 import multiprocessing
 import hashlib
 import shelve
+import pystat_config
+
 
 class ShelveDB(object):
     SHELVE_PATH = "/tmp"
@@ -275,7 +277,6 @@ class StatsServer(object):
                                                  args=(common_queue,))
         self.fwdworker.start()
         print "Fowarder Started!"
-
 
 
 
