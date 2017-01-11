@@ -73,8 +73,6 @@ class StatsForwarder(object):
     def __init__(self, common_queue):
         self.queue = common_queue
         self.cfg = pystat_config.PyStatConfig()
-        print "parsed data: ", self.cfg.parsedyaml
-
         self.forwarders = {}
 
         for forwarder in self.cfg.parsedyaml['forwarders'].keys():
@@ -294,10 +292,16 @@ class UDPServer(object):
 
 class StatsServer(object):
     def __init__(self):
-        self.bind_ip = os.environ.get('STATSD_BIND_ADDRESS', 'localhost')
+        self.cfg = pystat_config.PyStatConfig()
+
+        self.bind_ip = self.cfg.parsedyaml.get(
+            'bind_address',
+            os.environ.get('STATSD_BIND_ADDRESS', 'localhost'))
 
         # TODO: catch exception
-        self.bind_port = int(os.environ.get('STATSD_BIND_PORT', 5090))
+        self.bind_port = int(self.cfg.parsedyaml.get(
+            'bind_port',
+            os.environ.get('STATSD_BIND_PORT', 5090)))
 
         self.udpserver = None
         self.udpworker = None
