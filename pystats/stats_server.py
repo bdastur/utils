@@ -21,10 +21,26 @@ import time
 import signal
 import socket
 import json
+from threading import Thread
 import multiprocessing
 import hashlib
 import shelve
 import pystat_config
+
+
+class TimerMonitor(Thread):
+    DEFAULT_INTERVAL = 10
+    def __init__(self, duration, metricsmgr):
+        super(TimerMonitor, self).__init__()
+        self.sleep_interval = duration
+        self.metricsmgr = metricsmgr
+
+    def run(self):
+        print "Timer Monitor start"
+        while True:
+            time.sleep(self.sleep_interval)
+            print "TimerMonitor Wokeup"
+            self.metricsmgr.forward_metrics()
 
 
 class ShelveDB(object):
@@ -47,39 +63,49 @@ class ShelveDB(object):
             yield data
 
 
-class KafkaPublisher(object):
-    pass
-
 
 class StatsForwarder(object):
-    DEFAULT_INTERVAL = 40
+    TIMEOUT = 3
     FORWARDERS = {
-        'kafka': 'KafkaPublisher',
-        'logstash': 'LogstashForwarder'
+        'kafka': {'module': 'kafka_publisher', 'classname': 'KafkaPublisher'}
     }
 
     def __init__(self, common_queue):
-        self.interval = StatsForwarder.DEFAULT_INTERVAL
         self.queue = common_queue
-        self.db = ShelveDB()
+        self.cfg = pystat_config.PyStatConfig()
+        print "parsed data: ", self.cfg.parsedyaml
+
+        self.forwarders = {}
+
+        for forwarder in self.cfg.parsedyaml['forwarders'].keys():
+            fwobj = self.cfg.parsedyaml['forwarders'][forwarder]
+            mod = __import__(StatsForwarder.FORWARDERS[forwarder]['module'])
+            classobj = getattr(
+                mod, StatsForwarder.FORWARDERS[forwarder]['classname'])
+            if forwarder == "kafka":
+                kafka_broker = fwobj['kafka_broker']
+                kafka_apikey = fwobj['kafka_apikey']
+                kafka_tenant_id = fwobj['kafka_tenant_id']
+                kafka_topic = fwobj['kafka_topic']
+                self.forwarders[forwarder] = classobj(kafka_broker,
+                                                      kafka_apikey,
+                                                      kafka_tenant_id,
+                                                      kafka_topic)
 
     def start(self):
         while True:
-            time.sleep(StatsForwarder.DEFAULT_INTERVAL)
-            print "Forwarded Wokeup"
-            # Perform Action.
-            done = False
-            while not done:
-                objdata = None
-                try:
-                    objdata = self.queue.get(timeout=3)
-                except multiprocessing.queues.Empty:
-                    print "No data, move on"
-                    done = True
+            objdata = None
+            try:
+                objdata = self.queue.get(timeout=StatsForwarder.TIMEOUT)
+            except multiprocessing.queues.Empty:
+                continue
 
-                if objdata is not None:
-                    print "objdata ", objdata
+            if objdata is None:
+                print "No data. Continue"
+                continue
 
+            if objdata is not None:
+                print "Forward data: ", objdata
 
 class TraceMetric(object):
     """
@@ -147,13 +173,11 @@ class MetricsManager(object):
     'counter': 'CounterMetric',
     'trace': 'TraceMetric'
     }
-    DEFAULT_COUNTER = 20
 
     def __init__(self, common_queue):
         self.metrics = {}
         self.queue = common_queue
         self.db = ShelveDB()
-        self.db_counter = 0
 
     def init_metric(self, jdata):
         metric_name = jdata['metric_name']
@@ -167,15 +191,9 @@ class MetricsManager(object):
         metric_name = jdata['metric_name']
         if self.metrics.get(metric_name, None) is None:
             self.init_metric(jdata)
-            print "init metric"
         else:
-            print "update metric"
             self.metrics[metric_name].update_metric(jdata)
 
-        self.db_counter += 1
-        if self.db_counter >= MetricsManager.DEFAULT_COUNTER:
-            self.put_metric_data_on_queue(jdata)
-            self.db_counter = 0
 
     def display_metric_info(self, jdata):
         metric_name = jdata['metric_name']
@@ -196,6 +214,13 @@ class MetricsManager(object):
             self.db.add_to_db(metric_name, metricobj)
             self.queue.put(metric_name)
 
+    def forward_metrics(self):
+        print "Forward Metrics"
+        for metric_name in self.metrics.keys():
+            print "Put all metrics"
+            metricobj = self.metrics[metric_name].get_metric_info()
+            self.queue.put(metricobj)
+
 
 class UDPServer(object):
     """
@@ -212,10 +237,17 @@ class UDPServer(object):
                                   socket.SOCK_DGRAM)
         self.sock.bind((self.bind_ip, self.bind_port))
         self.metricsmgr = MetricsManager(common_queue)
+        self.timermonitor = None
 
+    def start_timer(self):
+        print "Start Timer Monitor"
+        self.timermonitor = TimerMonitor(10, self.metricsmgr)
+        self.timermonitor.start()
 
     def start_listener(self):
         """Listener"""
+        self.start_timer()
+
         while True:
             try:
                 data, addr = self.sock.recvfrom(UDPServer.BUFSIZE)
