@@ -28,18 +28,20 @@ class PystatAgent(object):
         self.udpclient = UDPClient(self.remote_addr, self.remote_port)
 
     def trace(self, metric_name, trace_info):
-        msg = trace_info
-        msg['metric_name'] = metric_name
-        msg['metric_type'] = "trace"
-        msg['host'] = self.host
-        jdata = json.dumps(msg)
-        self.udpclient.send_msg(jdata)
+        data = self.format_msg_data(metric_name, 'trace', trace_info, None)
+        self.udpclient.send_msg(data)
 
     def guage(self, metric_name, value, trace_info):
+        data = self.format_msg_data(metric_name, 'guage', trace_info, value)
+        self.udpclient.send_msg(data)
+
+    def format_msg_data(self, metric_name, metric_type, trace_info, value):
         msg = trace_info
         msg['metric_name'] = metric_name
-        msg['metric_type'] = "guage"
-        msg['value'] = value
+        msg['metric_type'] = metric_type
         msg['host'] = self.host
+        if metric_type == "guage":
+            msg['value'] = value
+
         jdata = json.dumps(msg)
-        self.udpclient.send_msg(jdata)
+        return jdata
