@@ -24,7 +24,6 @@ import json
 from threading import Thread
 import multiprocessing
 import hashlib
-import shelve
 import pystat_config
 
 
@@ -41,26 +40,6 @@ class TimerMonitor(Thread):
             time.sleep(self.sleep_interval)
             print "TimerMonitor Wokeup"
             self.metricsmgr.forward_metrics()
-
-
-class ShelveDB(object):
-    SHELVE_PATH = "/tmp"
-    def __init__(self):
-        self.shelve_files = {}
-
-    def add_to_db(self, metric_name, data):
-        shelve_file = os.path.join(ShelveDB.SHELVE_PATH, metric_name)
-        self.shelve_files[metric_name] = shelve_file
-        db = shelve.open(shelve_file)
-        db['data'] = data
-        db.close()
-
-    def get_data_from_db(self):
-        for shelve_file in self.shelve_files:
-            db = shelve.open(shelve_file)
-            data = db['data']
-            db.close()
-            yield data
 
 
 
@@ -152,7 +131,11 @@ class TraceMetric(object):
             if key in ['metric_name', 'metric_type']:
                 continue
             traceobj[key] = jdata[key]
-            hashstr += key + jdata[key]
+            try:
+                hashstr += key + jdata[key]
+            except TypeError:
+                hashstr += key + str(jdata[key])
+
 
         objhash = hashlib.md5(hashstr)
         hash_key = objhash.hexdigest()
@@ -186,10 +169,13 @@ class GuageMetric(object):
         traceobj = {}
         for key in jdata:
             # skip metric_name and type, copy rest.
-            if key in ['metric_name', 'metric_type']:
+            if key in ['metric_name', 'metric_type', 'value']:
                 continue
             traceobj[key] = jdata[key]
-            hashstr += key + jdata[key]
+            try:
+                hashstr += key + jdata[key]
+            except TypeError:
+                hashstr += key + str(jdata[key])
 
         objhash = hashlib.md5(hashstr)
         hash_key = objhash.hexdigest()
@@ -243,7 +229,6 @@ class MetricsManager(object):
     def __init__(self, common_queue):
         self.metrics = {}
         self.queue = common_queue
-        self.db = ShelveDB()
         self.last_sent_trace = []
 
     def init_metric(self, jdata):
@@ -271,14 +256,6 @@ class MetricsManager(object):
         metric_name = jdata['metric_name']
         metricobj = self.metrics[metric_name].get_metric_info()
         self.queue.put(metricobj)
-
-    def shelve_current_metric_info(self):
-        print "Shelve ALL Metrics"
-        for metric_name in self.metrics.keys():
-            print "Shelve Metrics: ", metric_name
-            metricobj = self.metrics[metric_name].get_metric_info()
-            self.db.add_to_db(metric_name, metricobj)
-            self.queue.put(metric_name)
 
     def forward_metrics(self):
         for metric_name in self.metrics.keys():
