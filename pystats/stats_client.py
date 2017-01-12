@@ -39,15 +39,19 @@ def main():
     "username": "behzad_dastur", "stage": "initialize"}'
     msg2 = '{"metric_name": "cfbroker.trace", "metric_type": "trace", \
     "username": "behzad_dastur", "stage": "error"}'
+    msg3 =  '{"metric_name": "cfbroker.latency", "metric_type": "guage", \
+    "value": "43", "username": "behzad_dastur", "stage": "error"}'
+
     msgs.append(msg)
     msgs.append(msg1)
     msgs.append(msg2)
+    msgs.append(msg3)
 
     for count in range(0, 1000):
         if count % 50 == 0:
             time.sleep(1)
 
-        msg = msgs[random.randrange(3)]
+        msg = msgs[random.randrange(4)]
         client.send_msg(msg)
 
 

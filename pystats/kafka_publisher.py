@@ -7,9 +7,7 @@ kafka Publisher:
 
 import datetime
 import json
-import socket
 from kafka import SimpleProducer, KafkaClient
-
 
 class KafkaPublisher(object):
     def __init__(self,
@@ -24,13 +22,13 @@ class KafkaPublisher(object):
 
         print "Kafka Publisher Initialized!"
 
-    def forward_metrics(self, metric_name, value, tags):
+    def forward_metrics(self, metric_name, value, tags, debug=True):
         self.publish_to_kafka_broker(metric_name,
                                      self.kafka_topic,
-                                     value, tags)
+                                     value, tags, debug=debug)
 
     def publish_to_kafka_broker(self, metric_name,
-                                kafka_topic, value, tags):
+                                kafka_topic, value, tags, debug=True):
         """
         Generate a payload and publish the data to kafka broker.
         """
@@ -40,14 +38,18 @@ class KafkaPublisher(object):
         metric = {}
         metric['apikey'] = self.kafka_apikey
         metric['tenant_id'] = self.kafka_tenant_id
-        metric['host'] = socket.gethostname()
+        #host should be passed by the caller. statsd might not be
+        # running on the same host as the caller.
+        #metric['host'] = socket.gethostname()
         metric['name'] = metric_name
         metric['value'] = value
         metric['@version'] = '1'
         metric['@timestamp'] = timestamp
         for tag in tags:
             metric[tag] = tags[tag]
-
-        kafka = KafkaClient(self.kafka_broker)
-        producer = SimpleProducer(kafka)
-        result = producer.send_messages(kafka_topic, json.dumps(metric))
+        if debug:
+            print "Kafka Metrics send: %s" % metric
+        else:
+            kafka = KafkaClient(self.kafka_broker)
+            producer = SimpleProducer(kafka)
+            result = producer.send_messages(kafka_topic, json.dumps(metric))

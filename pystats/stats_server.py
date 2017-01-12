@@ -74,6 +74,7 @@ class StatsForwarder(object):
         self.queue = common_queue
         self.cfg = pystat_config.PyStatConfig()
         self.forwarders = {}
+        self.debug_mode = self.cfg.parsedyaml.get('debug_mode', True)
 
         for forwarder in self.cfg.parsedyaml['forwarders'].keys():
             fwobj = self.cfg.parsedyaml['forwarders'][forwarder]
@@ -105,6 +106,8 @@ class StatsForwarder(object):
             # Forward metrics.
             if objdata['metric_type'] == "trace":
                 self.forward_trace_metrics(objdata)
+            elif objdata['metric_type'] == "guage":
+                self.forward_guage_metrics(objdata)
 
     def forward_trace_metrics(self, objdata):
         metric_name = objdata['metric_name']
@@ -115,8 +118,21 @@ class StatsForwarder(object):
                 if tag == "count":
                     continue
                 tags[tag] = objdata['trace_info'][key][tag]
-            #self.forwarders['kafka'].forward_metrics(metric_name, value, tags)
-            print "Forward to kafka: ", metric_name, value, tags
+            self.forwarders['kafka'].forward_metrics(
+                metric_name, value, tags, debug=self.debug_mode)
+
+    def forward_guage_metrics(self, objdata):
+        metric_name = objdata['metric_name']
+        tags = {}
+        for key in objdata['guage_info'].keys():
+            value = objdata['guage_info'][key]['value']
+            for tag in objdata['guage_info'][key].keys():
+                if tag == "value":
+                    continue
+                tags[tag] = objdata['guage_info'][key][tag]
+            self.forwarders['kafka'].forward_metrics(
+                metric_name, value, tags, debug=self.debug_mode)
+
 
 class TraceMetric(object):
     """
@@ -158,6 +174,44 @@ class TraceMetric(object):
         return metricobj
 
 
+class GuageMetric(object):
+    def __init__(self, jdata):
+        self.metric_name = jdata['metric_name']
+        self.metric_type = jdata['metric_type']
+        self.guage_info = {}
+
+    def update_metric(self, jdata):
+        self.metric_value = int(jdata['value'])
+        hashstr = ""
+        traceobj = {}
+        for key in jdata:
+            # skip metric_name and type, copy rest.
+            if key in ['metric_name', 'metric_type']:
+                continue
+            traceobj[key] = jdata[key]
+            hashstr += key + jdata[key]
+
+        objhash = hashlib.md5(hashstr)
+        hash_key = objhash.hexdigest()
+
+        if self.guage_info.get(hash_key, None) is None:
+            self.guage_info[hash_key] = traceobj
+            self.guage_info[hash_key]['value'] = jdata['value']
+        else:
+            self.guage_info[hash_key]['value'] = jdata['value']
+
+    def display_metric_info(self):
+        print "Name: %s Traceinfo: %s " % (self.metric_name, self.guage_info)
+
+
+    def get_metric_info(self):
+        metricobj = {}
+        metricobj['metric_name'] = self.metric_name
+        metricobj['metric_type'] = self.metric_type
+        metricobj['guage_info'] = self.guage_info
+        return metricobj
+
+
 class CounterMetric(object):
     def __init__(self, jdata):
         self.metric_name = jdata['metric_name']
@@ -181,8 +235,9 @@ class CounterMetric(object):
 
 class MetricsManager(object):
     METRIC_TYPES = {
-    'counter': 'CounterMetric',
-    'trace': 'TraceMetric'
+        'counter': 'CounterMetric',
+        'trace': 'TraceMetric',
+        'guage': 'GuageMetric'
     }
 
     def __init__(self, common_queue):
@@ -205,7 +260,6 @@ class MetricsManager(object):
             self.init_metric(jdata)
         else:
             self.metrics[metric_name].update_metric(jdata)
-
 
     def display_metric_info(self, jdata):
         metric_name = jdata['metric_name']
