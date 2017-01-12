@@ -40,6 +40,14 @@ class PystatAgent(object):
         msg['metric_name'] = metric_name
         msg['metric_type'] = metric_type
         msg['host'] = self.host
+
+        # Attach additional user provided tags to the msg.
+        if self.cfg.parsedyaml.get('agent', None) is not None:
+            agent_tags = self.cfg.parsedyaml['agent'].get('tags', None)
+            if agent_tags is not None:
+                for tag in agent_tags:
+                    msg[tag] = agent_tags[tag]
+
         if metric_type == "guage":
             msg['value'] = value
 
