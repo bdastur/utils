@@ -18,7 +18,8 @@ class UDPClient(object):
         """Send message"""
         self.sock.sendto(msg, (self.server_ip, self.server_port))
 
-class TraceAgent(object):
+
+class PystatAgent(object):
     def __init__(self):
         self.cfg = pystat_config.PyStatConfig()
         self.remote_addr = self.cfg.parsedyaml.get('bind_address', 'localhost')
@@ -30,6 +31,15 @@ class TraceAgent(object):
         msg = trace_info
         msg['metric_name'] = metric_name
         msg['metric_type'] = "trace"
+        msg['host'] = self.host
+        jdata = json.dumps(msg)
+        self.udpclient.send_msg(jdata)
+
+    def guage(self, metric_name, value, trace_info):
+        msg = trace_info
+        msg['metric_name'] = metric_name
+        msg['metric_type'] = "guage"
+        msg['value'] = value
         msg['host'] = self.host
         jdata = json.dumps(msg)
         self.udpclient.send_msg(jdata)
