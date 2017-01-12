@@ -3,6 +3,7 @@
 
 
 import socket
+import json
 import time
 import os
 import random
@@ -33,26 +34,52 @@ def main():
 
     msgs = []
 
-    msg = '{"metric_name": "cfbroker.app_trace", \
-    "metric_type": "counter", "count": "1"}'
-    msg1 = '{"metric_name": "cfbroker.trace", "metric_type": "trace", \
-    "username": "behzad_dastur", "stage": "initialize"}'
-    msg2 = '{"metric_name": "cfbroker.trace", "metric_type": "trace", \
-    "username": "behzad_dastur", "stage": "error"}'
-    msg3 =  '{"metric_name": "cfbroker.latency", "metric_type": "guage", \
-    "value": "43", "username": "behzad_dastur", "stage": "error"}'
 
-    msgs.append(msg)
-    msgs.append(msg1)
-    msgs.append(msg2)
-    msgs.append(msg3)
+
+    msg_counter = {
+        "metric_name": "cfbroker.app_trace",
+        "metric_type": "counter",
+        "count": 1,
+        "username": "behzad_dastur",
+        "stage": "success"
+    }
+
+    msg_trace_1 = {
+        "metric_name": "cfbroker.trace",
+        "metric_type": "trace",
+        "username": "behzad_dastur",
+        "stage": "initialize"
+    }
+    msg_trace_2 = {
+        "metric_name": "cfbroker.trace",
+        "metric_type": "trace",
+        "username": "behzad_dastur",
+        "stage": "error"
+    }
+
+    msg_guage = {
+        "metric_name": "cfbroker.latency",
+        "metric_type": "guage",
+        "value": 43,
+        "username": "behzad_dastur",
+        "stage": "success"
+    }
+
+    msgs.append(msg_counter)
+    msgs.append(msg_trace_1)
+    msgs.append(msg_trace_2)
+    msgs.append(msg_guage)
 
     for count in range(0, 1000):
         if count % 50 == 0:
             time.sleep(1)
+        idx = random.randrange(4)
+        msg = msgs[idx]
+        if 'value' in msg.keys():
+            msg['value'] = random.randrange(40)
 
-        msg = msgs[random.randrange(4)]
-        client.send_msg(msg)
+        jdata = json.dumps(msg)
+        client.send_msg(jdata)
 
 
 if __name__ == '__main__':
