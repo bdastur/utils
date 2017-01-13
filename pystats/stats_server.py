@@ -91,26 +91,24 @@ class StatsForwarder(object):
     def forward_trace_metrics(self, objdata):
         metric_name = objdata['metric_name']
         tags = {}
-        for key in objdata['trace_info'].keys():
-            value = objdata['trace_info'][key]['count']
-            for tag in objdata['trace_info'][key].keys():
-                if tag == "count":
-                    continue
-                tags[tag] = objdata['trace_info'][key][tag]
+        value = objdata['trace_info']['count']
+        for tag in objdata['trace_info'].keys():
+            if tag == "count":
+                continue
+            tags[tag] = objdata['trace_info'][tag]
             self.forwarders['kafka'].forward_metrics(
                 metric_name, value, tags, debug=self.debug_mode)
 
     def forward_guage_metrics(self, objdata):
         metric_name = objdata['metric_name']
         tags = {}
-        for key in objdata['guage_info'].keys():
-            value = objdata['guage_info'][key]['value']
-            for tag in objdata['guage_info'][key].keys():
-                if tag == "value":
-                    continue
-                tags[tag] = objdata['guage_info'][key][tag]
-            self.forwarders['kafka'].forward_metrics(
-                metric_name, value, tags, debug=self.debug_mode)
+        value = objdata['guage_info']['value']
+        for tag in objdata['guage_info'].keys():
+            if tag == "value":
+                continue
+            tags[tag] = objdata['guage_info'][tag]
+        self.forwarders['kafka'].forward_metrics(
+            metric_name, value, tags, debug=self.debug_mode)
 
 
 class TraceMetric(object):
@@ -150,11 +148,14 @@ class TraceMetric(object):
         print "Name: %s Traceinfo: %s " % (self.metric_name, self.trace_info)
 
     def get_metric_info(self):
-        metricobj = {}
-        metricobj['metric_name'] = self.metric_name
-        metricobj['metric_type'] = self.metric_type
-        metricobj['trace_info'] = self.trace_info
-        return metricobj
+        metricobjs = []
+        for key in self.trace_info.keys():
+            metricobj = {}
+            metricobj['metric_name'] = self.metric_name
+            metricobj['metric_type'] = self.metric_type
+            metricobj['trace_info'] = self.trace_info[key]
+            metricobjs.append(metricobj)
+        return metricobjs
 
 
 class GuageMetric(object):
@@ -189,13 +190,15 @@ class GuageMetric(object):
     def display_metric_info(self):
         print "Name: %s Traceinfo: %s " % (self.metric_name, self.guage_info)
 
-
     def get_metric_info(self):
-        metricobj = {}
-        metricobj['metric_name'] = self.metric_name
-        metricobj['metric_type'] = self.metric_type
-        metricobj['guage_info'] = self.guage_info
-        return metricobj
+        metricobjs = []
+        for key in self.guage_info.keys():
+            metricobj = {}
+            metricobj['metric_name'] = self.metric_name
+            metricobj['metric_type'] = self.metric_type
+            metricobj['guage_info'] = self.guage_info[key]
+            metricobjs.append(metricobj)
+        return metricobjs
 
 
 class CounterMetric(object):
@@ -216,7 +219,7 @@ class CounterMetric(object):
         metricobj['metric_name'] = self.metric_name
         metricobj['metric_type'] = self.metric_type
         metricobj['metric_counter'] = self.metric_counter
-        return metricobj
+        return [metricobj]
 
 
 class MetricsManager(object):
@@ -260,24 +263,25 @@ class MetricsManager(object):
 
     def forward_metrics(self):
         for metric_name in self.metrics.keys():
-            metricobj = self.metrics[metric_name].get_metric_info()
+            metricobjs = self.metrics[metric_name].get_metric_info()
 
-            hashstr = str(metricobj)
-            objhash = hashlib.md5(hashstr)
-            hash_key = objhash.hexdigest()
-            if hash_key in self.last_sent_trace:
-                print "(%d) skip sending: %s" % \
-                (len(self.last_sent_trace), hash_key)
-                continue
+            for metricobj in metricobjs:
+                hashstr = str(metricobj)
+                objhash = hashlib.md5(hashstr)
+                hash_key = objhash.hexdigest()
+                if hash_key in self.last_sent_trace:
+                    print "(%d) skip sending: %s" %  \
+                    (len(self.last_sent_trace), hash_key)
+                    continue
+                    
+                self.queue.put(metricobj)
+                self.last_sent_trace.append(hash_key)
 
-            self.queue.put(metricobj)
-            self.last_sent_trace.append(hash_key)
-
-            # Keep only the last n(10) elements in this list.
-            # as it is unlikely anything more than that has not been sent.
-            length = len(self.last_sent_trace)
-            if length > 10:
-                self.last_sent_trace.pop(0)
+                # Keep only the last n(10) elements in this list.
+                # as it is unlikely anything more than that has not been sent.
+                length = len(self.last_sent_trace)
+                if length > 10:
+                    self.last_sent_trace.pop(0)
 
 
 class UDPServer(object):
