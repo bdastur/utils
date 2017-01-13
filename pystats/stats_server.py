@@ -96,8 +96,9 @@ class StatsForwarder(object):
             if tag == "count":
                 continue
             tags[tag] = objdata['trace_info'][tag]
-            self.forwarders['kafka'].forward_metrics(
-                metric_name, value, tags, debug=self.debug_mode)
+
+        self.forwarders['kafka'].forward_metrics(
+            metric_name, value, tags, debug=self.debug_mode)
 
     def forward_guage_metrics(self, objdata):
         metric_name = objdata['metric_name']
@@ -107,6 +108,7 @@ class StatsForwarder(object):
             if tag == "value":
                 continue
             tags[tag] = objdata['guage_info'][tag]
+            
         self.forwarders['kafka'].forward_metrics(
             metric_name, value, tags, debug=self.debug_mode)
 
@@ -273,7 +275,7 @@ class MetricsManager(object):
                     print "(%d) skip sending: %s" %  \
                     (len(self.last_sent_trace), hash_key)
                     continue
-                    
+
                 self.queue.put(metricobj)
                 self.last_sent_trace.append(hash_key)
 
