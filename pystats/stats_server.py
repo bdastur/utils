@@ -243,6 +243,7 @@ class MetricsManager(object):
         metric_name = jdata['metric_name']
         if self.metrics.get(metric_name, None) is None:
             self.init_metric(jdata)
+            self.metrics[metric_name].update_metric(jdata)
         else:
             self.metrics[metric_name].update_metric(jdata)
 
