@@ -22,8 +22,14 @@ class UDPClient(object):
 class PystatAgent(object):
     def __init__(self):
         self.cfg = pystat_config.PyStatConfig()
-        self.remote_addr = self.cfg.parsedyaml.get('bind_address', 'localhost')
-        self.remote_port = self.cfg.parsedyaml.get('bind_port', 5090)
+        if self.cfg.parsedyaml is not None:
+            self.remote_addr = self.cfg.parsedyaml.get('bind_address',
+                                                       'localhost')
+            self.remote_port = self.cfg.parsedyaml.get('bind_port', 5090)
+        else:
+            self.remote_addr = 'localhost'
+            self.remote_port = 5090
+
         self.host = socket.gethostname()
         self.udpclient = UDPClient(self.remote_addr, self.remote_port)
 
