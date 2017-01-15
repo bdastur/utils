@@ -25,6 +25,7 @@ from threading import Thread
 import multiprocessing
 import hashlib
 import pystat_config
+import pystats_log
 
 
 class TimerMonitor(Thread):
@@ -50,10 +51,12 @@ class StatsForwarder(object):
     }
 
     def __init__(self, common_queue):
+        self.log = pystats_log.Logger(name="StatsForwarder")
         self.queue = common_queue
         self.cfg = pystat_config.PyStatConfig()
         self.forwarders = {}
         self.debug_mode = self.cfg.parsedyaml.get('debug_mode', True)
+        self.log.logger.info("Initialized!")
 
         for forwarder in self.cfg.parsedyaml['forwarders'].keys():
             fwobj = self.cfg.parsedyaml['forwarders'][forwarder]
@@ -108,7 +111,7 @@ class StatsForwarder(object):
             if tag == "value":
                 continue
             tags[tag] = objdata['guage_info'][tag]
-            
+
         self.forwarders['kafka'].forward_metrics(
             metric_name, value, tags, debug=self.debug_mode)
 
@@ -295,6 +298,7 @@ class UDPServer(object):
 
     def __init__(self, bind_ip, bind_port, common_queue):
         """Initalize UDPServer"""
+
         self.bind_ip = bind_ip
         self.bind_port = bind_port
         self.sock = socket.socket(socket.AF_INET,
