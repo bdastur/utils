@@ -9,6 +9,7 @@ import datetime
 import json
 from kafka import SimpleProducer, KafkaClient
 import pystats_log
+import socket
 
 class KafkaPublisher(object):
     def __init__(self,
@@ -54,7 +55,11 @@ class KafkaPublisher(object):
             self.log.logger.debug("Kafka Metrics sent: %s", metric)
         else:
             kafka = KafkaClient(self.kafka_broker)
-            producer = SimpleProducer(kafka)
-            result = producer.send_messages(kafka_topic, json.dumps(metric))
-            self.log.logger.debug("Kafka Metrics Pushed: [%s] [%d]",
-                metric, result)
+            try:
+                producer = SimpleProducer(kafka)
+                result = producer.send_messages(kafka_topic, json.dumps(metric))
+                self.log.logger.debug("Kafka Metrics Pushed: [%s] [%d]",
+                    metric, result)
+            except socket.gaierror as gaierror:
+                self.log.logger.critical("Publish Metric [%s] failed [%s]",
+                    metric, gaierror)

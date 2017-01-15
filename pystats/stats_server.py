@@ -235,9 +235,11 @@ class MetricsManager(object):
     }
 
     def __init__(self, common_queue):
+        self.log = pystats_log.Logger(name="MetricManager")
         self.metrics = {}
         self.queue = common_queue
         self.last_sent_trace = []
+        self.log.logger.info("Initialized!")
 
     def init_metric(self, jdata):
         metric_name = jdata['metric_name']
@@ -261,7 +263,6 @@ class MetricsManager(object):
             self.metrics[metric_name].display_metric_info()
 
     def put_metric_data_on_queue(self, jdata):
-        print "put data on queue: ", jdata
         metric_name = jdata['metric_name']
         metricobj = self.metrics[metric_name].get_metric_info()
         self.queue.put(metricobj)
@@ -298,7 +299,6 @@ class UDPServer(object):
 
     def __init__(self, bind_ip, bind_port, common_queue):
         """Initalize UDPServer"""
-
         self.bind_ip = bind_ip
         self.bind_port = bind_port
         self.sock = socket.socket(socket.AF_INET,
