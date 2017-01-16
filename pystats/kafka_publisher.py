@@ -56,8 +56,9 @@ class KafkaPublisher(object):
             try:
                 producer = SimpleProducer(kafka)
                 result = producer.send_messages(kafka_topic, json.dumps(metric))
-                msg = "Kafka Metrics Pushed: [%s] [%d]" % (metric, result)
+                msg = "Kafka Metrics Pushed: [%s] [%s]" % (metric, str(result))
                 pystats_log.print_msg(msg)
             except socket.gaierror as gaierror:
-                msg = "Publish metric [%s] failed. [%s]" % (metric, gaierror)
+                msg = "Publish metric [%s] failed. [%s]" % \
+                    (metric, str(gaierror))
                 pystats_log.print_msg(msg)
