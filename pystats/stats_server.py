@@ -28,6 +28,7 @@ import pystat_config
 import pystats_log
 
 
+
 class TimerMonitor(Thread):
     DEFAULT_INTERVAL = 10
     def __init__(self, duration, metricsmgr):
@@ -36,10 +37,10 @@ class TimerMonitor(Thread):
         self.metricsmgr = metricsmgr
 
     def run(self):
-        print "Timer Monitor start"
+        pystats_log.print_msg("Timer Monitor start")
         while True:
             time.sleep(self.sleep_interval)
-            print "TimerMonitor Wokeup"
+            pystats_log.print_msg("TimerMonitor Wokeup")
             self.metricsmgr.forward_metrics()
 
 
@@ -51,12 +52,11 @@ class StatsForwarder(object):
     }
 
     def __init__(self, common_queue):
-        self.log = pystats_log.Logger(name="StatsForwarder")
         self.queue = common_queue
-        self.cfg = pystat_config.PyStatConfig()
         self.forwarders = {}
+        self.cfg = pystat_config.PyStatConfig()
         self.debug_mode = self.cfg.parsedyaml.get('debug_mode', True)
-        self.log.logger.info("Initialized!")
+        pystats_log.print_msg("StatsForwarder Initialized!")
 
         for forwarder in self.cfg.parsedyaml['forwarders'].keys():
             fwobj = self.cfg.parsedyaml['forwarders'][forwarder]
@@ -235,11 +235,9 @@ class MetricsManager(object):
     }
 
     def __init__(self, common_queue):
-        self.log = pystats_log.Logger(name="MetricManager")
         self.metrics = {}
         self.queue = common_queue
         self.last_sent_trace = []
-        self.log.logger.info("Initialized!")
 
     def init_metric(self, jdata):
         metric_name = jdata['metric_name']
@@ -308,7 +306,7 @@ class UDPServer(object):
         self.timermonitor = None
 
     def start_timer(self):
-        print "Start Timer Monitor"
+        pystats_log.print_msg("Start Timer Monitor")
         self.timermonitor = TimerMonitor(10, self.metricsmgr)
         self.timermonitor.start()
 
@@ -320,12 +318,12 @@ class UDPServer(object):
             try:
                 data, addr = self.sock.recvfrom(UDPServer.BUFSIZE)
             except KeyboardInterrupt:
-                print "KeyboardInterrupt: Terminate Server!"
+                pystats_log.print_msg("KeyboardInterrupt: Terminate Server!")
                 sys.exit()
             try:
                 jdata = json.loads(data)
             except ValueError:
-                print "Data is not correct json string"
+                pystats_log.print_msg("Data is not correct json string")
                 continue
 
             self.metricsmgr.add_metric(jdata)
@@ -335,7 +333,6 @@ class UDPServer(object):
 class StatsServer(object):
     def __init__(self):
         self.cfg = pystat_config.PyStatConfig()
-
         self.bind_ip = self.cfg.parsedyaml.get(
             'bind_address',
             os.environ.get('STATSD_BIND_ADDRESS', 'localhost'))
