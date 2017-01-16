@@ -6,6 +6,15 @@ Logging Facility
 """
 
 import logging
+import datetime
+
+def print_msg(msg):
+    curtime = datetime.datetime.now()
+    mytime = "%s/%s/%s:%s.%s.%s" % \
+        (str(curtime.month), str(curtime.day), str(curtime.year),
+         str(curtime.hour), str(curtime.minute), str(curtime.second))
+
+    print "[%s] %s" % (mytime, msg)
 
 
 class Logger(object):

@@ -8,8 +8,8 @@ kafka Publisher:
 import datetime
 import json
 from kafka import SimpleProducer, KafkaClient
-import pystats_log
 import socket
+import pystats_log
 
 class KafkaPublisher(object):
     def __init__(self,
@@ -17,13 +17,10 @@ class KafkaPublisher(object):
                  kafka_apikey,
                  kafka_tenant_id,
                  kafka_topic):
-        self.log = pystats_log.Logger(name="KafkaPublisher")
         self.kafka_broker = kafka_broker
         self.kafka_apikey = kafka_apikey
         self.kafka_tenant_id = kafka_tenant_id
         self.kafka_topic = kafka_topic
-
-        self.log.logger.info("Initialized!")
 
     def forward_metrics(self, metric_name, value, tags, debug=True):
         self.publish_to_kafka_broker(metric_name,
@@ -52,14 +49,15 @@ class KafkaPublisher(object):
             metric[tag] = tags[tag]
 
         if debug:
-            self.log.logger.debug("Kafka Metrics sent: %s", metric)
+            msg = "DEBUG-ON: Kafka metrics tobe sent: %s" % (metric)
+            pystats_log.print_msg(msg)
         else:
             kafka = KafkaClient(self.kafka_broker)
             try:
                 producer = SimpleProducer(kafka)
                 result = producer.send_messages(kafka_topic, json.dumps(metric))
-                self.log.logger.debug("Kafka Metrics Pushed: [%s] [%d]",
-                    metric, result)
+                msg = "Kafka Metrics Pushed: [%s] [%d]" % (metric, result)
+                pystats_log.print_msg(msg)
             except socket.gaierror as gaierror:
-                self.log.logger.critical("Publish Metric [%s] failed [%s]",
-                    metric, gaierror)
+                msg = "Publish metric [%s] failed. [%s]" % (metric, gaierror)
+                pystats_log.print_msg(msg)
