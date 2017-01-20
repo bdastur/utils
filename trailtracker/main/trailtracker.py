@@ -22,7 +22,6 @@ AWSLogs/<account id>/CloudTrail/<region>/YYYY/MM/DD/<Cloud Trail Logfilename>
 An archive file, contains multiple event records, and for each day,
 there can be multiple archived log files.
 
-
 """
 
 class TrailTracker(object):
