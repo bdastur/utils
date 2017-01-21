@@ -11,6 +11,7 @@ import os
 import yaml
 import main.trailconfig as trailconfig
 import main.s3helper as s3helper
+import main.trailtracker as trailtracker
 
 
 class TrailConfigUt(unittest.TestCase):
@@ -96,5 +97,24 @@ class S3HelperUt(unittest.TestCase):
 
 
 class TrailTrackerUt(unittest.TestCase):
-    def test_basic(self):
-        pass
+    def setUp(self):
+        self.profile_name = os.environ.get('TT_PROFILE_NAME', 'default')
+        self.bucket_name = os.environ.get('TT_BUCKET_NAME', 'testbucket')
+
+    def test_trail_tracker_init(self):
+        ttracker = trailtracker.TrailTracker(self.profile_name,
+                                             self.bucket_name)
+        self.failUnless(ttracker.s3_helper.valid is True)
+
+    def test_build_prefix_path(self):
+        ttracker = trailtracker.TrailTracker(self.profile_name,
+                                             self.bucket_name)
+        self.failUnless(ttracker.s3_helper.valid is True)
+
+        myargs = {}
+
+        myargs['days'] = [2,3,4]
+
+        prefix_paths = ttracker.build_prefix_paths(**myargs)
+        self.failUnless(len(prefix_paths) > 0)
+        print "Total prefix paths: ", len(prefix_paths)
