@@ -24,9 +24,13 @@ there can be multiple archived log files.
 
 """
 
+import re
+import datetime
+import multiprocessing
 import main.trail_logging as trail_logging
 import main.trailconfig as trailconfig
 import main.s3helper as s3helper
+
 
 class TrailTracker(object):
     def __init__(self, profile_name, bucket_name, config_file=None):
@@ -143,7 +147,6 @@ class TrailTracker(object):
         prefix_paths = self.build_prefix_with_region(region, temp_paths)
         temp_paths = prefix_paths
 
-
         prefix_paths = self.build_prefix_with_year(year, temp_paths)
         temp_paths = prefix_paths
 
@@ -153,3 +156,115 @@ class TrailTracker(object):
         prefix_paths = self.build_prefix_with_day(days, temp_paths)
 
         return prefix_paths
+
+    def list_trail_archives(self, **kwargs):
+        trail_archives = []
+
+        prefix_paths = self.build_prefix_paths(**kwargs)
+        print "prefix paths: ", prefix_paths
+        for prefix in prefix_paths:
+            (ret, objlist) = self.s3_helper.get_object_list(prefix)
+            if ret == 1:
+                print "Failed to get objlist"
+                continue
+
+            trail_archives.extend(objlist)
+
+        return trail_archives
+
+    def initialize_listener(self, common_queue, custom_callback):
+        """
+        Lister to start listening on the queue for any records.
+
+        The generator will start parsing the records and putting it
+        on the common queue. This lister will be listening to it
+        till finally a obj with done flag is set.
+        """
+        objdata = None
+        while True:
+            try:
+                objdata = common_queue.get(timeout=3)
+            except multiprocessing.queues.Empty:
+                continue
+
+            if objdata.get('done', None is not None):
+                print "Done draining the queue!"
+                break
+
+            if objdata is not None:
+                if custom_callback is not None:
+                    custom_callback(objdata)
+                else:
+                    print "Data: ", objdata
+
+    def search_trail_archives(self, **kwargs):
+        print "kwargs: ", kwargs
+
+        trail_archives = self.list_trail_archives(**kwargs)
+
+        custom_callback = kwargs.get('custom_callback', None)
+        # Create a common queue, and a listener.
+        common_queue = multiprocessing.Queue()
+        listener = multiprocessing.Process(
+            target=self.initialize_listener,
+            args=(common_queue, custom_callback,))
+        listener.start()
+
+        total_archives = len(trail_archives)
+        count = 1
+        for archive in trail_archives:
+            key = archive['Key']
+            print "Key: ", key
+            worker = multiprocessing.Process(
+                target=self.get_trail_records,
+                args=(common_queue, key, ))
+            worker.start()
+            worker.join()
+            print "Done with worker [%d/%d]" % (count, total_archives)
+
+        print "Done with All Archives!"
+        common_queue.put({'done': True})
+        listener.join()
+        listener.terminate()
+
+    def get_trail_records(self, common_queue, key):
+        print "Trail records invoked"
+        (ret, objinfo) = self.s3_helper.get_trail_archive_object(key)
+        if ret == 1:
+            print "Failed to get archive obj"
+            return
+
+        for obj in objinfo['Records']:
+            if re.match(r'List*', obj['eventName']) or \
+                re.match(r'Get*', obj['eventName']) or \
+                re.match(r'CreateTags', obj['eventName']) or \
+                re.match(r'Describe*', obj['eventName']):
+                continue
+            search_args = {}
+            search_args['eventName'] = ".*nstance.*"
+            recobj = self.parse_record(obj, **search_args)
+            if recobj is not None:
+                common_queue.put(recobj)
+
+
+    def parse_record(self, record, **searchargs):
+        recordobj = {}
+        for key in searchargs:
+            searchstr = r'%s' % searchargs[key]
+            try:
+                if not re.match(searchstr, record[key]):
+                    return None
+            except re.error:
+                return None
+
+        recordobj['eventName']  = record['eventName']
+        #recordobj['eventTime'] = record['eventTime']
+        recordobj['eventTime'] = datetime.datetime.strptime(
+            record['eventTime'], '%Y-%m-%dT%H:%M:%SZ')
+        recordobj['requestParameters'] = record.get('requestParameters', None)
+        recordobj['errorCode'] = record.get('errorCode', None)
+        recordobj['sourceIPAddress'] = record['sourceIPAddress']
+        recordobj['arn'] = record['userIdentity']['arn']
+        recordobj['userName'] = record['userIdentity'].get('userName', None)
+
+        return recordobj
