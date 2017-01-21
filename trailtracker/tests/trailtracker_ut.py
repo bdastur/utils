@@ -118,3 +118,41 @@ class TrailTrackerUt(unittest.TestCase):
         prefix_paths = ttracker.build_prefix_paths(**myargs)
         self.failUnless(len(prefix_paths) > 0)
         print "Total prefix paths: ", len(prefix_paths)
+
+    def test_list_trail_archives(self):
+        ttracker = trailtracker.TrailTracker(self.profile_name,
+                                             self.bucket_name)
+        self.failUnless(ttracker.s3_helper.valid is True)
+
+        myargs = {}
+        myargs['accountname'] = "cpedevtest"
+        myargs['region'] = "us-east-1"
+        myargs['year'] = 2016
+        myargs['months'] = [12]
+        myargs['days'] = [29]
+
+        prefix_paths = ttracker.list_trail_archives(**myargs)
+        self.failUnless(len(prefix_paths) > 0)
+        print "Total trail archives: ", len(prefix_paths)
+
+    def listener_callback(self, objdata):
+        print "callback: objdata: ", objdata
+
+    def test_search_trail_archives(self):
+        ttracker = trailtracker.TrailTracker(self.profile_name,
+                                             self.bucket_name)
+        self.failUnless(ttracker.s3_helper.valid is True)
+
+        myargs = {}
+        myargs['accountname'] = "cpedevtest"
+        myargs['region'] = "us-east-1"
+        myargs['year'] = 2016
+        myargs['months'] = [12]
+        myargs['days'] = [29]
+
+        myargs['custom_callback'] = self.listener_callback
+
+        search_args = {}
+        search_args['eventName'] = "RunInstance"
+        myargs['search_args'] = search_args
+        ttracker.search_trail_archives(**myargs)
