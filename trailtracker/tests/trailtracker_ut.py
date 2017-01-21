@@ -7,8 +7,10 @@ Trail Tracker UT.
 """
 
 import unittest
+import os
 import yaml
 import main.trailconfig as trailconfig
+import main.s3helper as s3helper
 
 
 class TrailConfigUt(unittest.TestCase):
@@ -59,7 +61,40 @@ class TrailConfigUt(unittest.TestCase):
         self.failUnless(years[0] == 2016)
 
 
+class S3HelperUt(unittest.TestCase):
+    """
+    S3Helper unittest:
+
+    NOTE: For tests to pass, set the env variables as below:
+        TT_PROFILE_NAME="your profile name in ~/.aws/credentials"
+        TT_BUCKET_NAME="cloudtrail s3 bucketname"
+    """
+
+    def setUp(self):
+        self.profile_name = os.environ.get('TT_PROFILE_NAME', 'default')
+        self.bucket_name = os.environ.get('TT_BUCKET_NAME', 'testbucket')
+
+    def test_s3helper_init(self):
+        helper = s3helper.S3Helper(self.profile_name, self.bucket_name)
+        self.failUnless(helper.valid == True)
+
+    def test_s3helper_getobjlist_prefix_none(self):
+        helper = s3helper.S3Helper(self.profile_name, self.bucket_name)
+        self.failUnless(helper.valid == True)
+
+        (ret, objlist) = helper.get_object_list(None)
+        self.failUnless(ret != 0)
+
+    def test_s3helper_getobjlist_prefix_wrong(self):
+        helper = s3helper.S3Helper(self.profile_name, self.bucket_name)
+        self.failUnless(helper.valid == True)
+
+        prefix = "AWSLogs/434343"
+        (ret, objlist) = helper.get_object_list(prefix)
+        self.failUnless(ret != 0)
+
+
+
 class TrailTrackerUt(unittest.TestCase):
     def test_basic(self):
         pass
-        
