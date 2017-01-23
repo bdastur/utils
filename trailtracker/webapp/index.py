@@ -20,6 +20,7 @@ def iter_all_rows():
     "this, is, a, test",
     "this, is, a, test",
     "this, is, a, test",]
+
     return rows
 
 @app.route('/largecsv')
@@ -64,8 +65,62 @@ def listener_callback(objdata, app_queue):
             app_queue.put(objdata)
         print "COMMON OBJECT: ", common_obj
 
+def genhtml(data):
+    page = """
+    <html>
+        <header>TrailLog</header>
+        <body>""" + "data: "  + data +\
+        """
+        </body>
+    </html>
+    """
+    return page
 
 def gen(session):
+    page_start = \
+    """
+    <html>
+        <header>TrailLog</header>
+        <head>
+        <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+    </head>
+    <body>
+    """
+    table = """
+    <table>
+       <tr>
+        <th>Event Name</th>
+        <th>Event Time</th>
+        <th>User</th>
+     </tr>
+    """
+
+    page_end = \
+    """
+        </body>
+    </html>
+    """
+
+
+    yield page_start
+    yield table
+
     while True:
         try:
             objdata = app_queue.get(timeout=3)
@@ -78,9 +133,13 @@ def gen(session):
         print "OBJDATA in GEN: ", objdata
         objdata['eventTime'] = \
             objdata['eventTime'].strftime('%Y/%m/%d:%H:%M:%S')
-
+        col_evname = "<td>" + objdata['eventName'] + "</td>"
+        col_evtime = "<td>" + objdata['eventTime'] + "</td>"
+        col_user = "<td>" + objdata['userName'] + "</td>"
+        row = "<tr>" + col_evname + col_evtime + col_user + "</tr>"
         try:
-            yield json.dumps(objdata)
+            #yield json.dumps(objdata)
+            yield row
         except TypeError:
             print "objdata: %s is not json serializable" % objdata
 
@@ -111,6 +170,7 @@ def oldgen(session):
 
 def stream_trail_template(template_name, **context):
     print "Stream template"
+
     app.update_template_context(context)
     t = app.jinja_env.get_template(template_name)
     rv = t.stream(context)
@@ -126,11 +186,11 @@ def start_trail_search(myargs):
     ttracker.search_trail_archives(**myargs)
     #return Response(stream_trail_template('sample.html', **myargs))
 
-@app.route('/page2')
-def render_trail_records():
+@app.route('/page2/<accountname>')
+def render_trail_records(accountname):
     session['common_obj'] = None
     myargs = {}
-    myargs['accountname'] = "cpedevtest"
+    myargs['accountname'] = accountname
     myargs['region'] = "us-east-1"
     myargs['year'] = 2016
     myargs['months'] = [12]
@@ -147,7 +207,9 @@ def render_trail_records():
     worker = multiprocessing.Process(target=start_trail_search,
                                       args=(myargs,))
     worker.start()
-    return Response(gen(session),content_type='text/event-stream')
+    #return Response(gen(session),content_type='text/event-stream')
+    return Response(gen(session))
+    #return Response(stream_trail_template('sample.html', **myargs))
     worker.join()
 
     #return Response(stream_trail_template('sample.html', **myargs))
