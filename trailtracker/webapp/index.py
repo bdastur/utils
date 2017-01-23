@@ -58,6 +58,7 @@ def listener_callback(objdata, app_queue):
             print "SET Done to True"
             common_obj = None
             done = True
+            app_queue.put(objdata)
         else:
             print "SET COMMON OBJ and session"
             common_obj = objdata
@@ -112,7 +113,7 @@ def gen(session):
     """
 
     page_end = \
-    """
+    """  </table>
         </body>
     </html>
     """
@@ -130,6 +131,11 @@ def gen(session):
         if objdata is None:
             continue
 
+        if objdata.get('done', None) is not None:
+            print "Done with all the data"
+            yield page_end
+            break
+
         print "OBJDATA in GEN: ", objdata
         objdata['eventTime'] = \
             objdata['eventTime'].strftime('%Y/%m/%d:%H:%M:%S')
@@ -142,30 +148,6 @@ def gen(session):
             yield row
         except TypeError:
             print "objdata: %s is not json serializable" % objdata
-
-
-def oldgen(session):
-    with app.test_request_context():
-        print "GEN START>>>>>>> "
-        global common_obj
-        while True:
-            print "common obj: ", common_obj
-            if done:
-                print "Generator Done........."
-                break
-
-            if session.get('common_obj', None) is None:
-                print "session object is none"
-                time.sleep(1)
-                continue
-
-            print "session obj: ", session['common_obj']
-
-            # if common_obj is None:
-            #     time.sleep(1)
-            #     continue
-
-            yield json.dumps(session['common_obj'])
 
 
 def stream_trail_template(template_name, **context):

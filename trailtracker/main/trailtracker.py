@@ -50,7 +50,7 @@ class TrailTracker(object):
                 path = "AWSLogs/" + str(account_map[account]) + "/CloudTrail"
                 prefix_paths.append(path)
         elif accountname is not None:
-            account_id = account_map[accountname]
+            account_id = account_map.get(accountname, 'invalid')
             path = "AWSLogs/" + str(account_id) + "/CloudTrail"
             prefix_paths.append(path)
         else:
