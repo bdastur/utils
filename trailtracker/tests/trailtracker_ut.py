@@ -135,8 +135,10 @@ class TrailTrackerUt(unittest.TestCase):
         self.failUnless(len(prefix_paths) > 0)
         print "Total trail archives: ", len(prefix_paths)
 
-    def listener_callback(self, objdata):
+    def listener_callback(self, objdata, myarg):
         print "callback: objdata: ", objdata
+        print "callback myarg: ", myarg
+
 
     def test_search_trail_archives(self):
         ttracker = trailtracker.TrailTracker(self.profile_name,
@@ -150,7 +152,11 @@ class TrailTrackerUt(unittest.TestCase):
         myargs['months'] = [12]
         myargs['days'] = [29]
 
+        myvar = {}
+        myvar['test'] = "testvar"
         myargs['custom_callback'] = self.listener_callback
+        myargs['custom_callback_args'] = myvar
+
 
         search_args = {}
         search_args['eventName'] = "RunInstance"

@@ -172,7 +172,8 @@ class TrailTracker(object):
 
         return trail_archives
 
-    def initialize_listener(self, common_queue, custom_callback):
+    def initialize_listener(self, common_queue,
+                            custom_callback, custom_callback_args):
         """
         Lister to start listening on the queue for any records.
 
@@ -187,13 +188,14 @@ class TrailTracker(object):
             except multiprocessing.queues.Empty:
                 continue
 
-            if objdata.get('done', None is not None):
+            if objdata.get('done', None) is not None:
                 print "Done draining the queue!"
+                custom_callback(objdata, custom_callback_args)
                 break
 
             if objdata is not None:
                 if custom_callback is not None:
-                    custom_callback(objdata)
+                    custom_callback(objdata, custom_callback_args)
                 else:
                     print "Data: ", objdata
 
@@ -203,32 +205,48 @@ class TrailTracker(object):
         trail_archives = self.list_trail_archives(**kwargs)
 
         custom_callback = kwargs.get('custom_callback', None)
+        custom_callback_args = kwargs.get('custom_callback_args', None)
         # Create a common queue, and a listener.
         common_queue = multiprocessing.Queue()
         listener = multiprocessing.Process(
             target=self.initialize_listener,
-            args=(common_queue, custom_callback,))
+            args=(common_queue, custom_callback, custom_callback_args,))
         listener.start()
 
+        search_args = kwargs.get('search_args', None)
         total_archives = len(trail_archives)
         count = 1
-        for archive in trail_archives:
-            key = archive['Key']
-            print "Key: ", key
-            worker = multiprocessing.Process(
-                target=self.get_trail_records,
-                args=(common_queue, key, ))
-            worker.start()
-            worker.join()
-            print "Done with worker [%d/%d]" % (count, total_archives)
+
+        done = False
+        start = 0
+        step = 5
+        end = start + step
+        while not done:
+            workers = []
+            for archive in trail_archives[start:end]:
+                key = archive['Key']
+                print "Key: ", key
+                worker = multiprocessing.Process(
+                    target=self.get_trail_records,
+                    args=(common_queue, key, search_args,))
+                workers.append(worker)
+                worker.start()
+
+            for worker in workers:
+                worker.join()
+            start = end
+            end = start + step
+            print "Start another batch: %d, %d" % (start, end)
+            if end >= len(trail_archives):
+                done = True
 
         print "Done with All Archives!"
         common_queue.put({'done': True})
         listener.join()
         listener.terminate()
 
-    def get_trail_records(self, common_queue, key):
-        print "Trail records invoked"
+    def get_trail_records(self, common_queue, key, search_args):
+        print "Trail records invoked, ", search_args
         (ret, objinfo) = self.s3_helper.get_trail_archive_object(key)
         if ret == 1:
             print "Failed to get archive obj"
@@ -240,12 +258,11 @@ class TrailTracker(object):
                 re.match(r'CreateTags', obj['eventName']) or \
                 re.match(r'Describe*', obj['eventName']):
                 continue
-            search_args = {}
-            search_args['eventName'] = ".*nstance.*"
+            #search_args = {}
+            #search_args['eventName'] = ".*nstance.*"
             recobj = self.parse_record(obj, **search_args)
             if recobj is not None:
                 common_queue.put(recobj)
-
 
     def parse_record(self, record, **searchargs):
         recordobj = {}
