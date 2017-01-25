@@ -47,7 +47,7 @@ def render_large_template():
 
 common_obj = None
 done = False
-app_queue = None
+#app_queue = None
 
 def listener_callback(objdata, app_queue):
     with app.test_request_context():
@@ -77,7 +77,7 @@ def genhtml(data):
     """
     return page
 
-def gen(session):
+def gen(app_queue):
     page_start = \
     """
     <html>
@@ -178,7 +178,7 @@ def render_trail_records(accountname):
     myargs['months'] = [12]
     myargs['days'] = [29]
 
-    global app_queue
+    #global app_queue
     app_queue = multiprocessing.Queue()
 
     myargs['custom_callback'] = listener_callback
@@ -190,7 +190,7 @@ def render_trail_records(accountname):
                                       args=(myargs,))
     worker.start()
     #return Response(gen(session),content_type='text/event-stream')
-    return Response(gen(session))
+    return Response(gen(app_queue))
     #return Response(stream_trail_template('sample.html', **myargs))
     worker.join()
 
