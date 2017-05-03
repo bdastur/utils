@@ -19,17 +19,17 @@
   * SSd backed instance storage.
 
 *Memory Optimized:*
- - X1:
- ..- Lowest price per GiB of RAM
- ..- SSD Storage and EBS optimized by default
+- X1:
+  * Lowest price per GiB of RAM
+  * Storage and EBS optimized by default
 
- - R4:
- ..- Support for Enhanced networking.
- ..- DDR4 Memory
+* R4:
+    * Support for Enhanced networking.
+    * Memory
  
- - R3:
- ..- SSD Storage
- ..- Support for Enhanced networking.
+- R3:
+  - SSD Storage
+  - Support for Enhanced networking.
 
 *Storage Optimized:*
   - I3:
