@@ -126,6 +126,44 @@ VPC SG         - Controls outgoing and incoming instance traffic
   advantage of that.
 
 
+**Spot instances:**
+* Can be used for workloads that are not time critical and are tolerant to interruptions.
+* Offer greatest discount
+* Specify the price you are willing to pay for a certain instance type. When the bid
+  price is above the current spot price, the customer will receive the requested instance.
+* These instances operate like all other instances, and customers only pay the spot price for
+  the hours the instances run.
+* The instances run until:
+    * The customers terminate them
+    * The spot price goes above the customers bid price
+    * There is not enough unused capacity to meet the demand of the spot instances
+
+* If AWS EC2 needs to terminate the spot instance, the instance will receive a termination notice
+  providing 2 minute warning prior to terminating the instance.
+* If AWS terminates your spot instance, you get the hour it was terminated in for free.
+* If you terminate your spot instance, you pay for the hour.
+
+
+### Tenancy Options:
+**Shared Tenancy:**
+* Default tenancy model for all EC2 instances regardless of the instance type or pricing.
+* Means single host machine may house instances for different customers.
+* AWS does not use overprovisioning. Fully isolates instances from other instances on
+  the same host.
+
+**Dedicated Instances:**
+* Run on hardware that is dedicated to a single customer.
+* Other instances in the account will run on shared tenancy and will be isolated at
+  hardware level from dedicated instances in the account.
+
+**Dedicated Host:**
+* A physical server with EC2 instance capacity fully dedicated to a single customer.
+* Customer has control over which specific host runs an instance at launch.
+
+### Placement Groups:
+* Is a logical grouping of instances within a single AZ.
+* Recommended for applications that benefit from low network latency, high n/w throughput
+  or both.
 
 
 
