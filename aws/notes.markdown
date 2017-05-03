@@ -28,8 +28,8 @@
     * Memory
  
 - R3:
-  - SSD Storage
-  - Support for Enhanced networking.
+    - SSD Storage
+    - Support for Enhanced networking.
 
 *Storage Optimized:*
   - I3:
