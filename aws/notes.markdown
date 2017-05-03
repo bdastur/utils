@@ -70,6 +70,7 @@
   with an instance in a VPC or Amazon EC2 classic.
 
 EC2 Classic SG - Controls outgoing instance traffic
+  
 VPC SG         - Controls outgoing and incoming instance traffic
 
 * SG is stateful firewall; that is an outgoing message is remembered so that the
@@ -104,9 +105,9 @@ VPC SG         - Controls outgoing and incoming instance traffic
 - Term commitment and payment option determing the cost of reservation
 
 *payment options:*
-  - all upfront: 
-  - partial upfront
-  - no upfront:
+- all upfront: 
+- partial upfront
+- no upfront:
 
 **Modifying your reserved instances**
 * Modification does not change the remaining term of your reserved instances. Their end date
@@ -114,9 +115,9 @@ VPC SG         - Controls outgoing and incoming instance traffic
 * Modification is different from purchase.
 
 *What can you modify?*:
-  * Switch between AZs within the same region.
-  * Change between EC2 VPC and EC2 classic.
-  * Change the instance type within the same instance family (linux instances only)
+    * Switch between AZs within the same region.
+    * Change between EC2 VPC and EC2 classic.
+    * Change the instance type within the same instance family (linux instances only)
 
 * ASG can take advantage of reserved instance pricing. Reserved instances, are a billing construct.
 * RI gets applied to any running instance that fits the parameters of the RI. In other words,
