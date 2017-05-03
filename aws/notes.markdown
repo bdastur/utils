@@ -10,13 +10,13 @@
 
 *Compute Optimized:*
 - C4: 
-..* Compute optimzied for highest performing processors
-..* EBS optimized by default at no additional cost.
-..* Support for Enhanced networking and clustering.
+  * Compute optimzied for highest performing processors
+  * EBS optimized by default at no additional cost.
+  * Support for Enhanced networking and clustering.
 
 - C3: 
-..- Support for Enhanced networking and clustering.
-..- SSd backed instance storage.
+  * Support for Enhanced networking and clustering.
+  * SSd backed instance storage.
 
 *Memory Optimized:*
  - X1:
