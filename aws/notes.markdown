@@ -312,7 +312,80 @@ VPC SG         - Controls outgoing and incoming instance traffic
 
 ## ELB:
 
+* ELB service allows you to distribute traffic across a group of EC2 instances in
+  one or more availability zones within a region.
 
+* Internet facing ELB:
+    * A load balancer that takes requests from clients over the internet and 
+      distributes them to EC2 instances registered with the ELB.
+    * It receives public DNS name that clients can use to send requests to your
+      application.
+
+* Internal ELB
+    * As the name suggest is not exposed to clients on the web.
+
+* ELB in VPCs support IPV4 addresses only, ELB in EC2 classic supports IPV4 and IPV6.
+
+* HTTPS load balancers:
+    * Uses SSL/TLS protocol for encrypted connections.
+    * Enables encryption between clients and the ELB.
+    * Must install SSL Cert on the ELB.
+    * ELB does not support **Server Name Indication** (SNI). This means if you want
+      to host multiple websites on a fleet of EC2 instances behind ELB with a single
+      SSL, you will naeed to add **Subject Alternative Name** for each website to the
+      certificate to avoid site users seeing a warning message when the site is
+      accessed.
+
+* Listener is a process that checks for connection requests
+* Listener is configured with a protocol and a prot for the front end and back end connection.
+* Protocols: HTTP, HTTPS, SSL, TCP
+* Protocols operate at layer 4 and layer 7
+
+* Idle connection timeout:
+    * For each request a client makes, the ELB maintains 2 connections.
+    * For each connection the ELB manages the idle timeout and is triggered when no
+      data is sent over the connection for the specified time period.
+    * After the timeout period, the ELB closes the connection.
+    * Default idle timeout is 60 seconds for both connections.
+    * If using HTTP or HTTPS, recommendation is to use the keep-alive option for EC2
+      instances.
+    * You can enable keepalive in the web server settings or kernel settings of EC2
+      instance.
+    * Keepalive enablees ELB to reuse connections to your backend instance, which reduces
+      CPU utilization.
+    * To ensure that ELB is responsible for closing the connections to the instance,
+      make sure that the keepalive time is greater than the idel timeout setting on
+      the ELB.
+
+* Cross zone load balancing ensures that request traffic is routed evenly across
+  all backend instances regardless of AZ.
+
+* Connection Draining:
+    * ensures that ELB stops sending requests to instances that are deregistered or
+      unhealthy, while keeping existing connections open.
+    * Enables ELB to complete inflight requests made to these instances.
+    * Max timeout value between 1 and 3600 seconds. Default is 300 seconds.
+
+* Proxy Protocol:
+    * Allows ELB to add a human readable header with connection information such as source
+      IP addr, dest ip and port numbers. Header is sent to backend instance as part of
+      the request.
+    * Ensure that the ELB is not sitting behind a proxy server with proxy protocol enabled,
+      otherwise there will be a duplicate header.
+
+* Sticky Sessions:
+    * Enables ELB to bind a users session to a specific instance. This ensures that
+      all requests from the user during the session are sent to the same instance.
+    * Key to managing sticky sessions is to determinte how long your ELB should 
+      consistently route the user requests to the same instance.
+    * If your app has a session cookie, configure the ELB so that the session cookie follows
+      the duration specified by the applications session cookie
+    * You can configure ELB to create a session cookie by specifying your own stickiness
+      duration. ELB creates a cookie named AWSELB that is used to map the session to the instance.
+
+* Health checks:
+    * To test the status of the EC2 instance behind the ELB
+    * Either InService or OutofService
 
 
 
