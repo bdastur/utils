@@ -393,8 +393,59 @@ VPC SG         - Controls outgoing and incoming instance traffic
 
 ## Autoscaling:
 
+* Allows automatic scaling of EC2 instances based on a criteria.
+* Scaling in or scaling out.
+
+**Autoscaling Plans:**
+
+* Maintain current levels:
+    * Maintain a minimum number of running instances at all times
+    * When ASG finds an unhealthy instance it terminates it and launches a new one.
+* Manual scaling:
+    * You only need to specify the change in max, min or desired capacity of your ASG group.
+    * ASG maintains the process of creating or terminating instances to maintain the updated capacity.
+* Scheduled scaling:
+    * by schedule
+* Dynamic scaling:
+    * Create a scaling policy based on criteria like n/w bandwidth or CPU measured by cloudwatch
+      and measure a threshold.
 
 
+**ASG Components**
+
+* Launch Configuration:
+    * A template that ASG uses to create new instances.
+    * It is composed of config name, AMI, instance type, SG key pair.
+    * Default limit of launch config is 100 per region.
+    * Only a launch config name, AMI and instance type are needed to create a launch config.
+      key pair, SG and block device mapping are optional elements.
+
+* Autoscaling Group:
+    * Is a collection of EC2 instances managed by ASG service.
+    * Each ASG contains config options that control when auto scaling should launch new
+      instances and terminate existing ones. You specify the max, min and desired capacity.
+    * ASG can use on-demand or spot instances as EC2 instances it manages.
+    * On-demand is default, but spot instances can be used by referencing a max bid price in
+      the launch config.
+   * A launch config can reference on-demand or spot instances but not both.
+
+* Scaling Policy
+    * You can associate cloudwatch alarms and scaling policies to an ASG group to 
+      adjust dynamically.
+    * The policy is a set of instructions that tell ASG whether to scale out or scale in.
+    * You can associate more than on scaling policy to an ASG group.
+
+* You are billed for a full hour of running time even for EC2 instances that are launched
+  and terminated within the hour.
+* A good ASG best practice is to scale out quickly when needed but to scale in more slowly
+  to avoid having to relaunch new and separate EC2 instances for a spike in workload
+  that fluctuates up and down within minutes.
+* It is important to consider bootstrapping for EC2 instances launched by ASG.
+* It takes time to configure each new EC2 instance before the instance is healthy and 
+  capable of accepting traffic. Instances that start and are available to load faster can join
+  the capacity pool more quickly.
+* Instances that are more stateless instead of stateful will more gracefully enter and
+  exit an ASG group.
 
 
 
