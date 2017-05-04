@@ -297,6 +297,36 @@ VPC SG         - Controls outgoing and incoming instance traffic
 
 ---
 
+## EFS:
+* Supports the Network File System version 4 (NFSv4) protocol
+* You only pay for the storage you use
+* Can scale up to petabytes
+* Can support thousands of concurrent NFS connections
+* Data is stored across multiple AZs within a region
+* Read after write consistency.
+* Great use case for a file server
+
+
+
+---
+
+## ELB:
+
+
+
+
+
+---
+
+## Autoscaling:
+
+
+
+
+
+
+---
+
 ## S3:
 
 
