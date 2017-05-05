@@ -453,9 +453,128 @@ VPC SG         - Controls outgoing and incoming instance traffic
 
 ## S3:
 
+* S3 provides read-after-write consistency for PUTS to new objects (new key), but
+  eventual consistency for GETs and DELETEs of existing objects (existing key).
+  Eventual consistency means if you PUT new data to an existing key, a subsequent
+  GET might return old data. Similarly if you DELETE an object, a subsequent GET
+  for that object might still read the deleted object.
+  In all cases updates to a single key are atomic - for eventually-consistent reads
+  you will get new data or old data, but never an inconsistent mix of data.
+
+* Durability in S3 is achieved by replicating data geographically to different AZz
+  regardless of the versioning configuration. AWS does not use tables.
+* Bucket names must be unique across all AWS accounts, much like DNS names.
+* Bucket names can contain upto 63 lowercase letters, numbers, hyphens and periods.
+* You can have upto 100 buckets per account by default.
+* Even though the namespace for S3 is global, each S3 bucket is created in a specific
+  region that you choose. This let's you control where the data is stored.
+* Each object consist of data and metadata. Data is opaque to S3. Data is treated
+  simply as a stream of bytes.
+* Metadata can be system metadata: created and used by Amazon S3 or user metadata
+  which is optional and can only be specified during object creation time
+* Keys define the objects in S3 buckets. It can be upto 1024 bytes of unicode UTF-8
+  characters, including embedded slashes, backslashes, dots and dashes.
+
+**Bucket Url:**
+
+* S3 website URL:   https://bucketname.s3-website.us-east-1.amazon.aws.com
+* Normal bucket URL: https://s3.amazonaws.com/(bucketname)/(keypath)
+* Object URL: https://bucketname.s3.amazonaws.com/path/to/my/file.ext
+
+* S3 has durability of 99.999999999% and Availability of 99.9%
+* You can use the PUT api to put an object into S3. Largest object size can be 5GB. After that
+  you have to use multipart upload.
+* For objects larger than 100 MB you should infact use multipart upload.
+* Minimum file size can be 0 bytes
+
+* RSS: Reduced Redundancy storage. RSS offers 99.9% durability.
+
+**Access Control:**
+* By default when you create a bucket or object in S3, only you have access.
+* To allow access to others S3 provides ACLs (coarse grained access controls)
+  or IAM policies which are much finer grained.
+* ACLs allow you to grant certain coarse-grained permissions: Read, Write and Full control
+  on the object or bucket. ACLs are legacy access control created before IAM existed.
+* S3 bucket policies are the recommended access control mechanism for S3 and provide
+  much finer-grained control.
+
+**Static website hosting:**
+* Create a bucket, upload static files, make them public (world readable)
+* Enable static website hosting for the bcuket. This includes specifying an index
+  document and an error document.
+* The website will be available at https://<bucketname>.s3-website>-<aws region>.amazonaws.com
+* You can create a friendly DNS name in your own domain for the website using a CNAME and 
+  you have your website available.
+
+
+**Storage classes:**
+
+**S3 Standard:**
+* High durability, high availability, low latency and high performance object store
+  for general purpose use.
+* Offers low first-byte latency and high throughput.
+
+**S3 Standard - Infrequent Access:**
+* High/same durability, low latency and high throughput as S3 standard, but is designed
+  for long-lived, less frequently accessed data.
+* It has lower per GB-month storage cost than standard.
+* Minimum object size of 128KB
+* Minimum duration of 30 days and per-GB retrieval costs.
+
+**S3 Reduced Redundancy Storage (RRS):**
+* Offers slightly less durability (4 nines) than standard or standard IA at reduced cost.
+
+**Amazon Glacier:**
+* Secure, durable and extremely low cost storage for data
+* Optimized for infrequently accessed data.
+* To retrieve object from glacier you issue a restore command using S3 APIs. Three to five 
+  hours later object is copied to S3 RRS.
+* Glacier allows you to retrieve upto 5% of the S3 data store in Glacier for free each month.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ---
 
 ## VPC:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
