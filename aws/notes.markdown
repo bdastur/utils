@@ -202,9 +202,9 @@ VPC SG         - Controls outgoing and incoming instance traffic
 * Each EBS volume is automatically replicated within it's AZ to provide HA and
   durability.
 
-**Types for EBS Volumes:**
+### Types for EBS Volumes:
 
-* Magnetic Volumes:
+#### Magnetic Volumes:
     * Have the lowest performance characteristics
     * Lowest cost per gigabyte
     * Great cost effective solution for appropriate workloads
@@ -217,7 +217,7 @@ VPC SG         - Controls outgoing and incoming instance traffic
     * Billed based on provisioned space, regardless of how much data is actually stored
       on the volume
 
-* General purpose SSD:
+#### General purpose SSD:
     * Strong performance at moderate price
     * Range from 1 GB to 16TB and provides baseline performance of 3 IOPS per Gigabyte provisioned,
       capping at 10,000 IOPS.
@@ -229,7 +229,7 @@ VPC SG         - Controls outgoing and incoming instance traffic
         * Small to medium sized DB
         * Development and test environments.
 
-* Provisioned IOPS SSD:
+#### Provisioned IOPS SSD:
     * Designed to meed needs of I/O intensive workloads
     * Range from 4GB to 16 TB size.
     * When provisioning specify the size and the desired IOPS, upto the lower of 
@@ -241,12 +241,12 @@ VPC SG         - Controls outgoing and incoming instance traffic
         * Critical business applications requiring sustained IOPS performance
         * Large DB workloads
 
-* HDD throughput optimized (ST1):
+#### HDD throughput optimized (ST1):
     * Sequential writes
     * Frequently accessed workloads
     * Usually used for data warehouse applications.
 
-* HDD Cold (SC1)
+#### HDD Cold (SC1)
     * Less frequently accessed data
     * Usually used for file servers.
 
