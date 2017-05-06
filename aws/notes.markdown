@@ -531,7 +531,10 @@ VPC SG         - Controls outgoing and incoming instance traffic
 * To retrieve object from glacier you issue a restore command using S3 APIs. Three to five 
   hours later object is copied to S3 RRS.
 * Glacier allows you to retrieve upto 5% of the S3 data store in Glacier for free each month.
-
+* Glacier is not currently available in Asia Pacific (Singapore) and South America (Sao Paulo)
+* Designed for data that is retained for more than 90 days. 
+* Objects archived to Glacier incur cost for atleast 90 days enen if they are deleted or 
+  overwritten earlier.
 
 ### Versioning:
 * Versioning is enabled at the bucket level.
@@ -563,9 +566,44 @@ u'https://mysample-s3-bucket.s3.amazonaws.com/scripts/aws_volume_helper.py?AWSAc
 >>>
 ```
 
+### Multipart Uploads:
+* todo
 
 
+### Cross-Region Replication:
+* To enable cross-region replicatio versioning must be enabled on source and destination
+  bucket.
+* Only new data will be replicated, existing data must be copied over.
+* Any metadata and ACLs associated with the objects are also part of the replication.
+* When you delete specific versions of an object or delete a delete marker, it does
+  not get replicated to the target bucket. It's only when you delete an object that it
+  gets deleted from the replicated bucket.
 
+### S3 Request Rate and Performance considerations:
+* S3 will scale automatically to support very high request rates, automatically
+  re-partitioning your buckets as needed. 
+* If you need request rates higher than 100 requests/second, you may want to review
+  the S3 best practices guidelines in DEV guide.
+* To support higher request rates, it is best to ensure some level of random distribution of
+  keys. For eg. including a hash as a prefix to key names.
+
+http://docs.aws.amazon.com/AmazonS3/latest/dev/request-rate-perf-considerations.html
+
+### S3 Charges:
+* You are charged for:
+    * Storage
+    * Requests
+    * Storage management pricing (you can add tags to objects, buckets - charged for each tag)
+    * Data transfer pricing
+    * Transfer acceleration
+
+
+### S3 Transfer Acceleration:
+* Enables fast, easy and secure transfer of files over long distances
+  between client and an S3 bucket.
+* Transfer acceleration takes advantage of CloudFront's globally distributed edge locations.
+* As data arrives at an edge location, data is routed to Amazon S3 over an optimized networ path.
+* Additional charges may apply.
 
 
 
