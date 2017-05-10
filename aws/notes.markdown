@@ -193,6 +193,15 @@ VPC SG         - Controls outgoing and incoming instance traffic
 
 * Instance metadata: http://169.254.169.254/latest/meta-data/
 
+* When you stop an instance, AWS shuts it down. AWS does not charge hourly usage for a stopped instance, 
+  or data transfer fees, but AWS does charge for the storage for any Amazon EBS volumes. 
+* Each time you start a stopped instance AWS charges a full instance hour, even if you make this transition
+  multiple times within a single hour.
+* While the instance is stopped, you can tread its root volume like any other volume, modify it.
+  You can detach the volume from the stopped instance, attach it to a running instance, make your changes,
+  detach it from the running instance, and then reattach it to the stopped instance.
+
+
 
 ---
 
