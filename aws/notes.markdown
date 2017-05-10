@@ -61,6 +61,9 @@
     - Generated from existing instances
     - Uploaded virtual servers
 
+#### Creating AMIs:
+
+https://aws.amazon.com/blogs/security/how-to-create-a-custom-ami-with-encrypted-amazon-ebs-snapshots-and-share-it-with-other-accounts-and-regions/
 
 
 ### Security Groups:
