@@ -660,4 +660,24 @@ http://docs.aws.amazon.com/AmazonS3/latest/dev/request-rate-perf-considerations.
 
 
 
+## Cloudwatch:
+
+### Links:
+http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/viewing_metrics_with_cloudwatch.html
+
+Sample AWS CLI commands to get metrics:
+
+**To list all available metrics for a specific instance id.**
+
+```
+$ iaws cloudwatch list-metrics --profile testaccount --namespace AWS/EC2 --dimensions Name=InstanceId,Value=i-xxxaabdbdldkdl
+```
+
+**To get CPUCreditUsage metric statistics for a specific instance id**
+
+```
+$ aws cloudwatch get-metric-statistics --namespace AWS/EC2 --metric-name CPUCreditUsage \
+  --period 3600 --statistics Maximum --dimensions Name=InstanceId,Value=i-0xxxxxxxxx8dcxxxx 
+  --start-time 2017-05-20T00:00 --end-time 2017-05-21T00:00 --profile testaccount --output json
+```
 
