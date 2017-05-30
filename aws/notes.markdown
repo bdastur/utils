@@ -633,27 +633,25 @@ http://docs.aws.amazon.com/AmazonS3/latest/dev/request-rate-perf-considerations.
 
 ## VPC:
 
+* VPC CIDR block may be as large as /16 (65536 ip addresses) or as small as
+  /28 (16 ip addresses)
 
+* You must do the following to create a public subnet with internet access:
+  - Attach an IGW to your amazon VPC
+  - Create a subnet route table rule to send all non-local traffic to IGW
+  - configure your network ACLs and SG rules to allow relevant traffic to flow to
+    and from your instance.
 
+* You must do the following to enable an EC2 instance to send and receive traffic
+  from the internet:
+  - Assign a public IP address or EIP address.
+ 
+* In VPC, and instances Elastic IP remains associated with the instance when it is stopped
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+* RFC 1918: “Address Allocation for Private Internets"
+    * 10.0.0.0 - 10.255.255.255 (10/8 prefix)
+    * 172.16.0.0 - 172.31.255.255 (172.16/12 prefix)
+    * 192.168.0.0 - 192.168.255.255 (192.168/16 prefix)
 
 
 
