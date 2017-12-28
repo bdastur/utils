@@ -1,1 +1,8 @@
+name: "sample_dashboard"
 dashboard_title: "This is a simple dashboard"
+
+
+bootstrap_css_url: "{{ url_for('static', filename='css/bootstrap.slate.min.css') }}"
+statgrid_url: "{{ url_for('static', filename='css/statgrid.css') }}"
+jquery_gridster_url: "{{ url_for('static', filename='css/jquery.gridster.css') }}"
+
