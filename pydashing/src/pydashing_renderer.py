@@ -9,6 +9,8 @@ PyDashing Renderer:
 
 import os
 import jinja2
+import subprocess
+
 
 
 class PyDashingRenderer(object):
@@ -21,6 +23,7 @@ class PyDashingRenderer(object):
             print "Invalid path to dashboard templates [%s]" % \
                 dashboard_templates
             return
+        self.dashboard_template = {}
 
         self.parsed_data = parsed_data
         # Create staging folder.
@@ -31,9 +34,12 @@ class PyDashingRenderer(object):
         files = self.get_dashboard_templates(dashboard_templates)
         print "Files: ", files
 
-
         # Copy rendered templates.
         self.copy_rendered_templates(files)
+        self.copy_static_directory_to_staging()
+
+        self.generate_dashboard_rendered_object(files)
+        self.create_dasboard_html_template()
 
     def create_staging_folder(self, render_path, dashboard_name):
         """
@@ -94,6 +100,52 @@ class PyDashingRenderer(object):
         template = env.get_template(template_file)
         rendered_data = template.render(obj)
         return rendered_data
+
+    def copy_static_directory_to_staging(self):
+        '''
+        Copy Static directory to staging.
+        '''
+        template_dir = "../dashboard_templates"
+        static_dir = "../dashboard_templates/static"
+        staging_static = os.path.join(self.staging_directory, "static")
+        copy_cmd = ["cp", "-R", static_dir, staging_static]
+        subprocess.call(copy_cmd)
+
+    def generate_dashboard_rendered_object(self, file_list):
+        renderer_obj = self.generate_renderer_object()
+        for template_file in file_list:
+            # Render file.
+            rendered_template = self.render_j2_template(template_file,
+                                                        "..",
+                                                        renderer_obj)
+            print "Rendered Template"
+            filename = template_file.split("/")[-1]
+            filename_noext = filename.split(".")[0]
+            print "File name:", filename_noext
+            self.dashboard_template[filename_noext] = {}
+            self.dashboard_template[filename_noext]['text'] = rendered_template
+
+        print "Rendered dashboard: ", self.dashboard_template
+        print "Head: ", self.dashboard_template['head']['text']
+        print "keys: ", self.dashboard_template.keys()
+
+    def create_dasboard_html_template(self):
+        # Dashboard template.
+        dashboard_html = ""
+        dashboard_html += self.dashboard_template['html_start']['text'] + "\n"
+        dashboard_html += self.dashboard_template['head']['text'] + "\n"
+        dashboard_html += self.dashboard_template['body_start']['text'] + "\n"
+        dashboard_html += self.dashboard_template['body_end']['text'] + "\n"
+        dashboard_html += self.dashboard_template['html_end']['text'] + "\n"
+
+        templates_staging_directory = os.path.join(self.staging_directory,
+                                                   "templates")
+        dashboard_filename = self.parsed_data['name'] + ".html"
+        dashboard_filepath = os.path.join(templates_staging_directory,
+                                          dashboard_filename)
+        with open(dashboard_filepath, 'w') as outfile:
+            outfile.write(dashboard_html)
+
 
     def copy_rendered_templates(self, file_list):
         '''
