@@ -108,6 +108,9 @@ class PyDashingRenderer(object):
         template_dir = "../dashboard_templates"
         static_dir = "../dashboard_templates/static"
         staging_static = os.path.join(self.staging_directory, "static")
+        if os.path.exists(staging_static):
+            print "Static directory exists"
+
         copy_cmd = ["cp", "-R", static_dir, staging_static]
         subprocess.call(copy_cmd)
 
@@ -135,6 +138,9 @@ class PyDashingRenderer(object):
         dashboard_html += self.dashboard_template['html_start']['text'] + "\n"
         dashboard_html += self.dashboard_template['head']['text'] + "\n"
         dashboard_html += self.dashboard_template['body_start']['text'] + "\n"
+        dashboard_html += self.dashboard_template['container_start']['text'] + "\n"
+        dashboard_html += self.dashboard_template['dashboard_heading']['text'] + "\n"
+        dashboard_html += self.dashboard_template['container_end']['text'] + "\n"
         dashboard_html += self.dashboard_template['body_end']['text'] + "\n"
         dashboard_html += self.dashboard_template['html_end']['text'] + "\n"
 
