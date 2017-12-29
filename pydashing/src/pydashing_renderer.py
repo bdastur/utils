@@ -9,7 +9,6 @@ PyDashing Renderer:
 
 import os
 import jinja2
-import src.common as commonutils
 
 
 class PyDashingRenderer(object):
@@ -46,17 +45,31 @@ class PyDashingRenderer(object):
         else:
             print "Staging dir [%s] exist." % staging_directory
 
+        # Create Folders for saving templates and static files.
+        template_dir = os.path.join(staging_directory, 'templates')
+        if not os.path.exists(template_dir):
+            os.mkdir(template_dir)
+
+        static_dir = os.path.join(staging_directory, 'static')
+
+
         return staging_directory
 
     def get_dashboard_templates(self, dirpath):
         """
         Get all the files in the get_dashboard_templates
         """
+        print "OS. listdir: ", os.listdir(dirpath)
+        filenames = os.listdir(dirpath)
         files = []
-        for (path, dirname, filenames) in os.walk(dirpath):
-            for filename in filenames:
-                filepath = os.path.join("dashboard_templates", filename)
-                files.append(filepath)
+        for filename in filenames:
+            temppath = os.path.join(dirpath, filename)
+            if os.path.isdir(temppath):
+                print "%s continue as it is a directory.", temppath
+                continue
+
+            filepath = os.path.join("dashboard_templates", filename)
+            files.append(filepath)
 
         return files
 
@@ -90,15 +103,27 @@ class PyDashingRenderer(object):
         # Generate the renderer object.
         renderer_obj = self.generate_renderer_object()
 
+        templates_staging_directory = os.path.join(self.staging_directory,
+                                                   "templates")
         for template_file in file_list:
             # Render the file.
             rendered_obj = self.render_j2_template(template_file,
                                                    "..",
                                                    renderer_obj)
 
-            # file name
+            # Get filename from path
             filename = template_file.split("/")[-1]
             filename = filename.split(".j2")[0]
-            file_path = os.path.join(self.staging_directory, filename)
-            with open(file_path, 'w') as outfile:
-                outfile.write(rendered_obj)
+
+            # Only copy hmtl templates to templates
+            try:
+                ext = filename.split(".html")[1]
+                print "EXT: %s, filename: %s " % (ext, filename)
+                file_path = os.path.join(templates_staging_directory, filename)
+                with open(file_path, 'w') as outfile:
+                    outfile.write(rendered_obj)
+            except IndexError:
+                file_path = os.path.join(self.staging_directory, filename)
+                print "FILEPATH: ", file_path
+                with open(file_path, 'w') as outfile:
+                    outfile.write(rendered_obj)
