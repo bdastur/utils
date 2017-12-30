@@ -111,7 +111,7 @@ class PyDashingRenderer(object):
         if os.path.exists(staging_static):
             print "Static directory exists"
 
-        copy_cmd = ["cp", "-R", static_dir, staging_static]
+        copy_cmd = ["cp", "-R", static_dir, self.staging_directory]
         subprocess.call(copy_cmd)
 
     def generate_dashboard_rendered_object(self, file_list):
