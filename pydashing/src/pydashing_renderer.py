@@ -140,7 +140,9 @@ class PyDashingRenderer(object):
         dashboard_html += self.dashboard_template['body_start']['text'] + "\n"
         dashboard_html += self.dashboard_template['container_start']['text'] + "\n"
         dashboard_html += self.dashboard_template['dashboard_heading']['text'] + "\n"
+        dashboard_html += self.dashboard_template['gridster']['text'] + "\n"
         dashboard_html += self.dashboard_template['container_end']['text'] + "\n"
+        dashboard_html += self.dashboard_template['scripts']['text'] + "\n"
         dashboard_html += self.dashboard_template['body_end']['text'] + "\n"
         dashboard_html += self.dashboard_template['html_end']['text'] + "\n"
 
