@@ -6,3 +6,14 @@ bootstrap_css_url: "{{ url_for('static', filename='css/bootstrap.slate.min.css')
 statgrid_url: "{{ url_for('static', filename='css/statgrid.css') }}"
 jquery_gridster_url: "{{ url_for('static', filename='css/jquery.gridster.css') }}"
 
+
+scripts:
+  - "{{ url_for('static', filename='js/hc/js/highcharts.js') }}"
+  - "https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js"
+  - "{{ url_for('static', filename='js/gridster/jquery.gridster.min.js') }}"
+  - "{{ url_for('static', filename='js/utils.js') }}"
+  - "{{ url_for('static', filename='js/single_stat_widget.js') }}"
+  - "{{ url_for('static', filename='js/barchart.js') }}"
+  - "{{ url_for('static', filename='js/example5.js') }}"
+
+
