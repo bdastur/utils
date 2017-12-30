@@ -1,14 +1,30 @@
-<script type="text/javascript"
-  src={{ url_for('static', filename='js/hc/js/highcharts.js') }}</script>
-<script type="text/javascript"
-  src=https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js</script>
-<script type="text/javascript"
-  src={{ url_for('static', filename='js/gridster/jquery.gridster.min.js') }}</script>
-<script type="text/javascript"
-  src={{ url_for('static', filename='js/utils.js') }}</script>
-<script type="text/javascript"
-  src={{ url_for('static', filename='js/single_stat_widget.js') }}</script>
-<script type="text/javascript"
-  src={{ url_for('static', filename='js/barchart.js') }}</script>
-<script type="text/javascript"
-  src={{ url_for('static', filename='js/example5.js') }}</script>
+    <script type="text/javascript"
+       src="{{ url_for('static', filename='js/hc/js/highcharts.js') }}"></script>
+    <script type="text/javascript"
+       src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript"
+       src="{{ url_for('static', filename='js/gridster/jquery.gridster.min.js') }}"></script>
+    <script type="text/javascript"
+       src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script type="text/javascript"
+       src="{{ url_for('static', filename='js/single_stat_widget.js') }}"></script>
+    <script type="text/javascript"
+       src="{{ url_for('static', filename='js/barchart.js') }}"></script>
+    <script type="text/javascript"
+       src="{{ url_for('static', filename='js/example5.js') }}"></script>
+
+    <script type="text/javascript">
+        var gridster;
+
+        $(function () {
+            gridster = $(".gridster ul").gridster({
+                widget_base_dimensions: [180, 150],
+                widget_margins: [5, 5],
+                autogrow_cols: true,
+                resize: {
+                    enabled: true
+                }
+            }).data('gridster');
+
+        });
+    </script>

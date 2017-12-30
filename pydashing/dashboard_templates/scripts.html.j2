@@ -1,4 +1,21 @@
 {% for script in J2_SCRIPTS %}
-<script type="text/javascript"
-  src={{ script }}</script>
+    <script type="text/javascript"
+       src="{{ script }}"></script>
 {% endfor %}
+
+    <script type="text/javascript">
+        var gridster;
+
+        $(function () {
+            gridster = $(".gridster ul").gridster({
+                widget_base_dimensions: [180, 150],
+                widget_margins: [5, 5],
+                autogrow_cols: true,
+                resize: {
+                    enabled: true
+                }
+            }).data('gridster');
+
+        });
+    </script>
+
