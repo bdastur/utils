@@ -62,3 +62,7 @@ target/
 openstack/scripts/setup_config.sh
 openstack/python_tools/setup.yaml
 openstack/python_tools/configs/
+
+tfbootstrap/bin/*
+tfbootstrap/pkg/*
+**/gopkg.in/*
