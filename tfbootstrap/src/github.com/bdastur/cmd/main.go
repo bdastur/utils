@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"flag"
-	"github.com/bdastur/tfhelper"
+	"fmt"
 	"os"
+
+	"github.com/bdastur/tfhelper"
 )
 
 func usage() {
@@ -13,8 +14,7 @@ func usage() {
 	fmt.Println(usageMessage)
 }
 
-
-func build_nested_cli(args []string) {
+func build_nested_cli(args []string) string {
 	// Validate cmdline arguments.
 	fmt.Println("Args: ", args)
 	if len(args) <= 1 {
@@ -27,6 +27,8 @@ func build_nested_cli(args []string) {
 	createOperation := flag.NewFlagSet("create", flag.ExitOnError)
 	regionOption := createOperation.String("region", "", "AWS Region.")
 	accountOption := createOperation.String("account", "", "AWS Account Alias")
+	clusterSpecOption := createOperation.String(
+		"clusterspec", "", "Provide a json formated cluster spec")
 
 	switch args[1] {
 	case "create":
@@ -37,16 +39,16 @@ func build_nested_cli(args []string) {
 	}
 
 	if createOperation.Parsed() {
-		if *regionOption == "" || *accountOption == "" {
+		if *regionOption == "" || *accountOption == "" || *clusterSpecOption == "" {
 			fmt.Println("Region and Account are required!")
 			os.Exit(1)
 		}
 	}
-
+	return *clusterSpecOption
 }
 
 func main() {
 	fmt.Println("Test! Build ensted cli.")
-	build_nested_cli(os.Args)
-	tfhelper.BootstrapEnvironment("us-west-2", "dev1")
+	clusterSpecString := build_nested_cli(os.Args)
+	tfhelper.BootstrapEnvironment(clusterSpecString)
 }
