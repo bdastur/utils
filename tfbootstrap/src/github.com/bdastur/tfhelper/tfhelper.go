@@ -1,6 +1,7 @@
 package tfhelper
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -24,8 +25,8 @@ func checkErr(err error, message string) {
 }
 
 type ClusterSpec struct {
-	Region  string
-	Profile string
+	Region  string `json: "region"`
+	Profile string `json: "account"`
 }
 
 func RenderProvider(clusterSpec ClusterSpec) {
@@ -62,30 +63,22 @@ func RenderProvider(clusterSpec ClusterSpec) {
 
 }
 
-func buildClusterSpec(region string, account string) ClusterSpec {
+func buildClusterSpec(clusterSpecString string) (error, ClusterSpec) {
 	var clusterSpec ClusterSpec
-	clusterSpec.Region = region
-	clusterSpec.Profile = account
 
-	return clusterSpec
+	fmt.Println("cluster spec string: ", clusterSpecString)
+	jsonbytes := []byte(clusterSpecString)
+	err := json.Unmarshal(jsonbytes, &clusterSpec)
+	if err != nil {
+		fmt.Println("Failed to Unmarsh json data: ", err)
+		return nil, clusterSpec
+	}
+	fmt.Println("Region: ", clusterSpec.Region)
+
+	return nil, clusterSpec
 }
 
-func BootstrapEnvironment(region string, account string) {
-	fmt.Println("tfhelper-go")
-	fmt.Printf("Account: %s, Region: %s \n", account, region)
-
-	//Build cluster spec object.
-	clusterSpec := buildClusterSpec(region, account)
-	fmt.Println("cluster SPec: ", clusterSpec)
-
-	// Get cwd.
-	dir, err := os.Getwd()
-	if err != nil {
-		fmt.Printf("Failed to get Wd.!")
-	}
-
-	fmt.Printf("Cwd: %s \n", dir)
-
+func setupStagingFolder(region string, account string) {
 	// Make the staging folder.
 	mode := os.FileMode(0744)
 	if _, err := os.Stat(environments_dir); os.IsNotExist(err) {
@@ -93,6 +86,7 @@ func BootstrapEnvironment(region string, account string) {
 	} else {
 		fmt.Printf("Directory %s exists \n", environments_dir)
 	}
+
 	// Create a subfolder
 	s := []string{region, "-", account}
 	envdir_name := strings.Join(s, "")
@@ -108,6 +102,32 @@ func BootstrapEnvironment(region string, account string) {
 	} else {
 		fmt.Printf("Directory %s exists \n", s3_staging_folder)
 	}
+
+}
+
+func BootstrapEnvironment(clusterSpecString string) {
+	fmt.Println("tfhelper-go")
+	region := "us-west-2"
+	account := "dev1"
+	fmt.Printf("Account: %s, Region: %s \n", account, region)
+
+	//Build cluster spec object.
+	err, clusterSpec := buildClusterSpec(clusterSpecString)
+	if err != nil {
+		fmt.Println("Failed to build cluster spec!")
+		return
+	}
+	fmt.Println("cluster SPec: ", clusterSpec)
+
+	// Get cwd.
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Failed to get Wd.!")
+	}
+
+	fmt.Printf("Cwd: %s \n", dir)
+
+	setupStagingFolder(clusterSpec.Region, clusterSpec.Profile)
 
 	//Render provieder.
 	RenderProvider(clusterSpec)
