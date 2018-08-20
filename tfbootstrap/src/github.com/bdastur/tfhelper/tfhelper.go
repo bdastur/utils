@@ -2,9 +2,14 @@ package tfhelper
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
+
+	"github.com/bdastur/templates"
 )
 
 const (
@@ -18,9 +23,60 @@ func checkErr(err error, message string) {
 	}
 }
 
+type ClusterSpec struct {
+	Region  string
+	Profile string
+}
+
+func RenderProvider(clusterSpec ClusterSpec) {
+
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Current working dir: ", dir)
+
+	// fmt.Println("template file: ", template_file)
+	// template_file_path := path.Join(templates_dir, template_file)
+
+	// result, err := os.Stat(template_file_path)
+	// fmt.Println("Result: ", result, "  Err: ", err)
+	// data, err := ioutil.ReadFile(template_file_path)
+	// fmt.Println("Data: ", string(data[:]))
+
+	provider_tmpl := templates.GetProviderTemplate()
+	fmt.Println("Provider Template: ", provider_tmpl)
+
+	// var clusterSpec ClusterSpec
+	// clusterSpec.Region = region
+
+	tmpl, err := template.New("spec").Parse(provider_tmpl)
+	if err != nil {
+		panic(err)
+	}
+
+	err = tmpl.Execute(os.Stdout, clusterSpec)
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+func buildClusterSpec(region string, account string) ClusterSpec {
+	var clusterSpec ClusterSpec
+	clusterSpec.Region = region
+	clusterSpec.Profile = account
+
+	return clusterSpec
+}
+
 func BootstrapEnvironment(region string, account string) {
 	fmt.Println("tfhelper-go")
 	fmt.Printf("Account: %s, Region: %s \n", account, region)
+
+	//Build cluster spec object.
+	clusterSpec := buildClusterSpec(region, account)
+	fmt.Println("cluster SPec: ", clusterSpec)
 
 	// Get cwd.
 	dir, err := os.Getwd()
@@ -53,4 +109,6 @@ func BootstrapEnvironment(region string, account string) {
 		fmt.Printf("Directory %s exists \n", s3_staging_folder)
 	}
 
+	//Render provieder.
+	RenderProvider(clusterSpec)
 }
