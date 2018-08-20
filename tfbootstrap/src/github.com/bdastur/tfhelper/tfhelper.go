@@ -1,6 +1,7 @@
 package tfhelper
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -29,7 +30,7 @@ type ClusterSpec struct {
 	Profile string `json: "account"`
 }
 
-func RenderProvider(clusterSpec ClusterSpec) {
+func renderProvider(clusterSpec ClusterSpec) {
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
@@ -61,6 +62,13 @@ func RenderProvider(clusterSpec ClusterSpec) {
 		panic(err)
 	}
 
+	renderedData := new(bytes.Buffer)
+	err = tmpl.Execute(renderedData, clusterSpec)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Rendered Data: ", renderedData.String())
+
 }
 
 func buildClusterSpec(clusterSpecString string) (error, ClusterSpec) {
@@ -78,7 +86,7 @@ func buildClusterSpec(clusterSpecString string) (error, ClusterSpec) {
 	return nil, clusterSpec
 }
 
-func setupStagingFolder(region string, account string) {
+func setupStagingFolder(region string, account string) string {
 	// Make the staging folder.
 	mode := os.FileMode(0744)
 	if _, err := os.Stat(environments_dir); os.IsNotExist(err) {
@@ -103,6 +111,11 @@ func setupStagingFolder(region string, account string) {
 		fmt.Printf("Directory %s exists \n", s3_staging_folder)
 	}
 
+	return s3_staging_folder
+}
+
+func createTerraformFile() {
+	// Crete a new tf definition file in the staging environment.
 }
 
 func BootstrapEnvironment(clusterSpecString string) {
@@ -127,8 +140,8 @@ func BootstrapEnvironment(clusterSpecString string) {
 
 	fmt.Printf("Cwd: %s \n", dir)
 
-	setupStagingFolder(clusterSpec.Region, clusterSpec.Profile)
-
-	//Render provieder.
-	RenderProvider(clusterSpec)
+	s3_staging_folder := setupStagingFolder(clusterSpec.Region, clusterSpec.Profile)
+	fmt.Println("Staging fodler ready: ", s3_staging_folder)
+	//Render provider.
+	renderProvider(clusterSpec)
 }
