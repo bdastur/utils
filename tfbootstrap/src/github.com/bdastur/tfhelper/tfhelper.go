@@ -11,12 +11,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bdastur/command"
 	"github.com/bdastur/templates"
 )
 
 const (
 	environments_dir = "/tmp/s3backends"
 	templates_dir    = "tftemplates"
+	terraform_bin    = "/usr/local/bin/terraform"
 )
 
 func checkErr(err error, message string) {
@@ -30,34 +32,21 @@ type ClusterSpec struct {
 	Profile string `json: "account"`
 }
 
-func renderProvider(clusterSpec ClusterSpec) {
-
+func getProviderDefinition(clusterSpec ClusterSpec) string {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Current working dir: ", dir)
 
-	// fmt.Println("template file: ", template_file)
-	// template_file_path := path.Join(templates_dir, template_file)
-
-	// result, err := os.Stat(template_file_path)
-	// fmt.Println("Result: ", result, "  Err: ", err)
-	// data, err := ioutil.ReadFile(template_file_path)
-	// fmt.Println("Data: ", string(data[:]))
-
-	provider_tmpl := templates.GetProviderTemplate()
-	fmt.Println("Provider Template: ", provider_tmpl)
+	providerTmpl := templates.GetProviderTemplate()
+	strings.Trim(providerTmpl, " ")
+	fmt.Println("Provider Template: ", providerTmpl)
 
 	// var clusterSpec ClusterSpec
 	// clusterSpec.Region = region
 
-	tmpl, err := template.New("spec").Parse(provider_tmpl)
-	if err != nil {
-		panic(err)
-	}
-
-	err = tmpl.Execute(os.Stdout, clusterSpec)
+	tmpl, err := template.New("spec").Parse(providerTmpl)
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +57,7 @@ func renderProvider(clusterSpec ClusterSpec) {
 		panic(err)
 	}
 	fmt.Println("Rendered Data: ", renderedData.String())
-
+	return renderedData.String()
 }
 
 func buildClusterSpec(clusterSpecString string) (error, ClusterSpec) {
@@ -114,8 +103,19 @@ func setupStagingFolder(region string, account string) string {
 	return s3_staging_folder
 }
 
-func createTerraformFile() {
+func createTerraformFile(stagingFolder string, tfDefinition string) error {
 	// Crete a new tf definition file in the staging environment.
+	filePath := path.Join(stagingFolder, "main.tf")
+	fileHandle, err := os.Create(filePath)
+
+	count, err := fileHandle.WriteString(tfDefinition)
+	if err != nil {
+		fmt.Println("Failed to write data to ", filePath)
+		return err
+	}
+	fmt.Println("Bytes written: ", count)
+
+	return err
 }
 
 func BootstrapEnvironment(clusterSpecString string) {
@@ -143,5 +143,34 @@ func BootstrapEnvironment(clusterSpecString string) {
 	s3_staging_folder := setupStagingFolder(clusterSpec.Region, clusterSpec.Profile)
 	fmt.Println("Staging fodler ready: ", s3_staging_folder)
 	//Render provider.
-	renderProvider(clusterSpec)
+	providerDefinition := getProviderDefinition(clusterSpec)
+	fmt.Println("Provider Definition: ", providerDefinition)
+
+	//Create Terraform definition file.
+	createTerraformFile(s3_staging_folder, providerDefinition)
+
+	// Terraform init.
+	out, err := command.ExecuteCommand(terraform_bin, s3_staging_folder, "init")
+	if err != nil {
+		fmt.Println("Error executing command: ", err)
+		return
+	}
+	fmt.Println("out: ", out)
+
+	// Terraform plan
+	out, err = command.ExecuteCommand(terraform_bin, s3_staging_folder, "plan")
+	if err != nil {
+		fmt.Println("Error executing command: ", err)
+		return
+	}
+	fmt.Println("out: ", out)
+
+	// Terraform apply
+	out, err = command.ExecuteCommand(terraform_bin, s3_staging_folder, "apply")
+	if err != nil {
+		fmt.Println("Error executing command: ", err)
+		return
+	}
+	fmt.Println("out: ", out)
+
 }
