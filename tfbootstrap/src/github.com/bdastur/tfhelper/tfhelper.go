@@ -46,7 +46,6 @@ func parseTemplate(clusterSpec ClusterSpec, templateData string) string {
 func getProviderDefinition(clusterSpec ClusterSpec) string {
 	providerTmpl := templates.GetProviderTemplate()
 	strings.Trim(providerTmpl, " ")
-	fmt.Println("Provider Template: ", providerTmpl)
 
 	renderedData := parseTemplate(clusterSpec, providerTmpl)
 	return renderedData
@@ -55,7 +54,6 @@ func getProviderDefinition(clusterSpec ClusterSpec) string {
 func getBackendDefinition(clusterSpec ClusterSpec) string {
 	backendTmpl := templates.GetBackendTemplate()
 	strings.Trim(backendTmpl, " ")
-	fmt.Println("Provider Template: ", backendTmpl)
 
 	renderedData := parseTemplate(clusterSpec, backendTmpl)
 	return renderedData
@@ -129,6 +127,33 @@ func createTerraformFile(stagingFolder string, tfDefinition string) error {
 	return err
 }
 
+func createTemplateDefinition(clusterSpec ClusterSpec, renderBackend bool) string {
+	/*
+	 * Render template definitions
+	 */
+
+	// Render provider.
+	providerDefinition := getProviderDefinition(clusterSpec)
+
+	// Render Remote state.
+	remoteStateDefinition := getRemoteStateDefinition(clusterSpec)
+
+	// Render Backend.
+	var s []string
+	if renderBackend {
+		backendDefinition := getBackendDefinition(clusterSpec)
+		s = []string{providerDefinition, "\n",
+			backendDefinition, "\n", remoteStateDefinition}
+	} else {
+		s = []string{providerDefinition, "\n", remoteStateDefinition}
+	}
+
+	// Concat definitions into a single string.
+	templateDefinition := strings.Join(s, "")
+
+	return templateDefinition
+}
+
 func BootstrapEnvironment(clusterSpecString string) {
 	fmt.Println("tfhelper-go")
 	region := "us-west-2"
@@ -150,19 +175,20 @@ func BootstrapEnvironment(clusterSpecString string) {
 	/*
 	 * Render template definitions
 	 */
+	templateDefinition := createTemplateDefinition(clusterSpec, false)
+	fmt.Println("Template definition: ", templateDefinition)
+	// // Render provider.
+	// providerDefinition := getProviderDefinition(clusterSpec)
 
-	// Render provider.
-	providerDefinition := getProviderDefinition(clusterSpec)
+	// // Render Remote state.
+	// remoteStateDefinition := getRemoteStateDefinition(clusterSpec)
 
-	// Render Remote state.
-	remoteStateDefinition := getRemoteStateDefinition(clusterSpec)
+	// // Render Backend.
+	// //backendDefinition := getBackendDefinition(clusterSpec)
 
-	// Render Backend.
-	//backendDefinition := getBackendDefinition(clusterSpec)
-
-	// Concat definitions into a single string.
-	s := []string{providerDefinition, "\n", remoteStateDefinition}
-	templateDefinition := strings.Join(s, "")
+	// // Concat definitions into a single string.
+	// s := []string{providerDefinition, "\n", remoteStateDefinition}
+	// templateDefinition := strings.Join(s, "")
 
 	//Create Terraform definition file.
 	createTerraformFile(s3_staging_folder, templateDefinition)
