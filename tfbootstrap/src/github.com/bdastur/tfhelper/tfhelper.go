@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/bdastur/command"
@@ -21,43 +19,46 @@ const (
 	terraform_bin    = "/usr/local/bin/terraform"
 )
 
-func checkErr(err error, message string) {
-	if err != nil {
-		fmt.Printf("%s\n", message)
-	}
-}
+// func checkErr(err error, message string) {
+// 	if err != nil {
+// 		fmt.Printf("%s\n", message)
+// 	}
+// }
 
 type ClusterSpec struct {
+	Account string `json: "account"`
 	Region  string `json: "region"`
-	Profile string `json: "account"`
 }
 
-func getProviderDefinition(clusterSpec ClusterSpec) string {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Current working dir: ", dir)
-
-	providerTmpl := templates.GetProviderTemplate()
-	strings.Trim(providerTmpl, " ")
-	fmt.Println("Provider Template: ", providerTmpl)
-
-	// var clusterSpec ClusterSpec
-	// clusterSpec.Region = region
-
-	tmpl, err := template.New("spec").Parse(providerTmpl)
+func parseTemplate(clusterSpec ClusterSpec, templateData string) string {
+	tmpl, err := template.New("spec").Parse(templateData)
 	if err != nil {
 		panic(err)
 	}
-
 	renderedData := new(bytes.Buffer)
 	err = tmpl.Execute(renderedData, clusterSpec)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Rendered Data: ", renderedData.String())
 	return renderedData.String()
+}
+
+func getProviderDefinition(clusterSpec ClusterSpec) string {
+	providerTmpl := templates.GetProviderTemplate()
+	strings.Trim(providerTmpl, " ")
+	fmt.Println("Provider Template: ", providerTmpl)
+
+	renderedData := parseTemplate(clusterSpec, providerTmpl)
+	return renderedData
+}
+
+func getBackendDefinition(clusterSpec ClusterSpec) string {
+	backendTmpl := templates.GetBackendTemplate()
+	strings.Trim(backendTmpl, " ")
+	fmt.Println("Provider Template: ", backendTmpl)
+
+	renderedData := parseTemplate(clusterSpec, backendTmpl)
+	return renderedData
 }
 
 func buildClusterSpec(clusterSpecString string) (error, ClusterSpec) {
@@ -70,7 +71,9 @@ func buildClusterSpec(clusterSpecString string) (error, ClusterSpec) {
 		fmt.Println("Failed to Unmarsh json data: ", err)
 		return nil, clusterSpec
 	}
+
 	fmt.Println("Region: ", clusterSpec.Region)
+	fmt.Println("Account: ", clusterSpec.Account)
 
 	return nil, clusterSpec
 }
@@ -133,21 +136,35 @@ func BootstrapEnvironment(clusterSpecString string) {
 	fmt.Println("cluster SPec: ", clusterSpec)
 
 	// Get cwd.
-	dir, err := os.Getwd()
-	if err != nil {
-		fmt.Printf("Failed to get Wd.!")
-	}
+	// dir, err := os.Getwd()
+	// if err != nil {
+	// 	fmt.Printf("Failed to get Wd.!")
+	// }
 
-	fmt.Printf("Cwd: %s \n", dir)
+	// fmt.Printf("Cwd: %s \n", dir)
 
-	s3_staging_folder := setupStagingFolder(clusterSpec.Region, clusterSpec.Profile)
+	// Setup staging folder.
+	s3_staging_folder := setupStagingFolder(clusterSpec.Region, clusterSpec.Account)
 	fmt.Println("Staging fodler ready: ", s3_staging_folder)
-	//Render provider.
+
+	/*
+	 * Render template definitions
+	 */
+
+	// Render provider.
 	providerDefinition := getProviderDefinition(clusterSpec)
 	fmt.Println("Provider Definition: ", providerDefinition)
 
+	// Render Backend.
+	backendDefinition := getBackendDefinition(clusterSpec)
+	fmt.Println("Backend Definition: ", backendDefinition)
+
+	// Concat definitions into a single string.
+	s := []string{providerDefinition, "\n", backendDefinition}
+	templateDefinition := strings.Join(s, "")
+
 	//Create Terraform definition file.
-	createTerraformFile(s3_staging_folder, providerDefinition)
+	createTerraformFile(s3_staging_folder, templateDefinition)
 
 	// Terraform init.
 	out, err := command.ExecuteCommand(terraform_bin, s3_staging_folder, "init")
