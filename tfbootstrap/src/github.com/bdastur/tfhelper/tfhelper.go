@@ -154,6 +154,34 @@ func createTemplateDefinition(clusterSpec ClusterSpec, renderBackend bool) strin
 	return templateDefinition
 }
 
+func deployTerraformState(s3_staging_folder string) error {
+	// Terraform init.
+	out, err := command.ExecuteCommand(terraform_bin, s3_staging_folder, "init")
+	if err != nil {
+		fmt.Println("Error executing command: ", err)
+		return err
+	}
+	fmt.Println("out: ", out)
+
+	// Terraform plan
+	out, err = command.ExecuteCommand(terraform_bin, s3_staging_folder, "plan")
+	if err != nil {
+		fmt.Println("Error executing command: ", err)
+		return err
+	}
+	fmt.Println("out: ", out)
+
+	// Terraform apply
+	out, err = command.ExecuteCommand(terraform_bin, s3_staging_folder,
+		"apply", "-auto-approve")
+	if err != nil {
+		fmt.Println("Error executing command: ", err)
+		return err
+	}
+	fmt.Println("out: ", out)
+	return err
+}
+
 func BootstrapEnvironment(clusterSpecString string) {
 	fmt.Println("tfhelper-go")
 	region := "us-west-2"
@@ -181,29 +209,10 @@ func BootstrapEnvironment(clusterSpecString string) {
 	//Create Terraform definition file.
 	createTerraformFile(s3_staging_folder, templateDefinition)
 
-	// Terraform init.
-	out, err := command.ExecuteCommand(terraform_bin, s3_staging_folder, "init")
+	// Deploy terraform state.
+	err = deployTerraformState(s3_staging_folder)
 	if err != nil {
-		fmt.Println("Error executing command: ", err)
-		return
+		fmt.Println("Failed to deploy terraform state.")
 	}
-	fmt.Println("out: ", out)
-
-	// Terraform plan
-	out, err = command.ExecuteCommand(terraform_bin, s3_staging_folder, "plan")
-	if err != nil {
-		fmt.Println("Error executing command: ", err)
-		return
-	}
-	fmt.Println("out: ", out)
-
-	// Terraform apply
-	out, err = command.ExecuteCommand(terraform_bin, s3_staging_folder,
-		"apply", "-auto-approve")
-	if err != nil {
-		fmt.Println("Error executing command: ", err)
-		return
-	}
-	fmt.Println("out: ", out)
 
 }
