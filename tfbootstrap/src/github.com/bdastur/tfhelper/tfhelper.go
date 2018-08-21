@@ -61,6 +61,14 @@ func getBackendDefinition(clusterSpec ClusterSpec) string {
 	return renderedData
 }
 
+func getRemoteStateDefinition(clusterSpec ClusterSpec) string {
+	remoteTmpl := templates.GetTfStateRemoteTemplate()
+	strings.Trim(remoteTmpl, " ")
+
+	renderedData := parseTemplate(clusterSpec, remoteTmpl)
+	return renderedData
+}
+
 func buildClusterSpec(clusterSpecString string) (error, ClusterSpec) {
 	var clusterSpec ClusterSpec
 
@@ -133,15 +141,7 @@ func BootstrapEnvironment(clusterSpecString string) {
 		fmt.Println("Failed to build cluster spec!")
 		return
 	}
-	fmt.Println("cluster SPec: ", clusterSpec)
-
-	// Get cwd.
-	// dir, err := os.Getwd()
-	// if err != nil {
-	// 	fmt.Printf("Failed to get Wd.!")
-	// }
-
-	// fmt.Printf("Cwd: %s \n", dir)
+	fmt.Println("cluster Spec: ", clusterSpec)
 
 	// Setup staging folder.
 	s3_staging_folder := setupStagingFolder(clusterSpec.Region, clusterSpec.Account)
@@ -153,14 +153,15 @@ func BootstrapEnvironment(clusterSpecString string) {
 
 	// Render provider.
 	providerDefinition := getProviderDefinition(clusterSpec)
-	fmt.Println("Provider Definition: ", providerDefinition)
+
+	// Render Remote state.
+	remoteStateDefinition := getRemoteStateDefinition(clusterSpec)
 
 	// Render Backend.
-	backendDefinition := getBackendDefinition(clusterSpec)
-	fmt.Println("Backend Definition: ", backendDefinition)
+	//backendDefinition := getBackendDefinition(clusterSpec)
 
 	// Concat definitions into a single string.
-	s := []string{providerDefinition, "\n", backendDefinition}
+	s := []string{providerDefinition, "\n", remoteStateDefinition}
 	templateDefinition := strings.Join(s, "")
 
 	//Create Terraform definition file.
@@ -183,7 +184,8 @@ func BootstrapEnvironment(clusterSpecString string) {
 	fmt.Println("out: ", out)
 
 	// Terraform apply
-	out, err = command.ExecuteCommand(terraform_bin, s3_staging_folder, "apply")
+	out, err = command.ExecuteCommand(terraform_bin, s3_staging_folder,
+		"apply", "-auto-approve")
 	if err != nil {
 		fmt.Println("Error executing command: ", err)
 		return
