@@ -186,10 +186,10 @@ func deployTerraformState(s3StagingFolder string) error {
  * Invoke the API to Bootstrap New AWS Environment
  */
 func BootstrapEnvironment(clusterSpecString string) {
-	fmt.Println("tfhelper-go")
-	region := "us-west-2"
-	account := "dev1"
-	fmt.Printf("Account: %s, Region: %s \n", account, region)
+	// fmt.Println("tfhelper-go")
+	// region := "us-west-2"
+	// account := "dev1"
+	// fmt.Printf("Account: %s, Region: %s \n", account, region)
 
 	//Build cluster spec object.
 	err, clusterSpec := buildClusterSpec(clusterSpecString)
