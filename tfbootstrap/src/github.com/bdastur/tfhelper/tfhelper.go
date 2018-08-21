@@ -156,7 +156,8 @@ func createTemplateDefinition(clusterSpec ClusterSpec, renderBackend bool) strin
 
 func deployTerraformState(s3StagingFolder string) error {
 	// Terraform init.
-	out, err := command.ExecuteCommand(terraform_bin, s3StagingFolder, "init")
+	out, err := command.ExecuteCommand(terraform_bin,
+		s3StagingFolder, "init", "-force-copy")
 	if err != nil {
 		fmt.Println("Error executing command: ", err)
 		return err
@@ -204,9 +205,24 @@ func BootstrapEnvironment(clusterSpecString string) {
 	fmt.Println("Staging fodler ready: ", s3StagingFolder)
 
 	/*
-	 * Render template definitions
+	 * Render template definitions without backend.
 	 */
 	templateDefinition := createTemplateDefinition(clusterSpec, false)
+	fmt.Println("Template definition: ", templateDefinition)
+
+	//Create Terraform definition file.
+	createTerraformFile(s3StagingFolder, templateDefinition)
+
+	// Deploy terraform state.
+	err = deployTerraformState(s3StagingFolder)
+	if err != nil {
+		fmt.Println("Failed to deploy terraform state.")
+	}
+
+	/*
+	 * Render template definition and add backend
+	 */
+	templateDefinition = createTemplateDefinition(clusterSpec, true)
 	fmt.Println("Template definition: ", templateDefinition)
 
 	//Create Terraform definition file.
