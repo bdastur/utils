@@ -177,18 +177,6 @@ func BootstrapEnvironment(clusterSpecString string) {
 	 */
 	templateDefinition := createTemplateDefinition(clusterSpec, false)
 	fmt.Println("Template definition: ", templateDefinition)
-	// // Render provider.
-	// providerDefinition := getProviderDefinition(clusterSpec)
-
-	// // Render Remote state.
-	// remoteStateDefinition := getRemoteStateDefinition(clusterSpec)
-
-	// // Render Backend.
-	// //backendDefinition := getBackendDefinition(clusterSpec)
-
-	// // Concat definitions into a single string.
-	// s := []string{providerDefinition, "\n", remoteStateDefinition}
-	// templateDefinition := strings.Join(s, "")
 
 	//Create Terraform definition file.
 	createTerraformFile(s3_staging_folder, templateDefinition)
