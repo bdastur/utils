@@ -24,28 +24,28 @@ terraform {
 	}
 }
 `
-/ * TF State S3 Backend Definition */
-	tfstateBackendTemplate = `
-	resource "aws_dynamodb_table" "terraform_statelock" {
-		name           = "{{ .Region }}-{{ .Account }}-dynamodb-table-tf-lock"
-		read_capacity  = 1 
-		write_capacity = 1
-		hash_key       = "LockID"
+	/* TFstate remote definition */
+	tfstateRemoteTemplate = `
+resource "aws_dynamodb_table" "terraform_statelock" {
+	name           = "{{ .Region }}-{{ .Account }}-dynamodb-table-tf-lock"
+	read_capacity  = 1 
+	write_capacity = 1
+	hash_key       = "LockID"
 	
-		attribute {
-			name = "LockID"
-			type = "S"
-		}
-	
-		lifecycle {
-			prevent_destroy = false
-		}
+	attribute {
+		name = "LockID"
+		type = "S"
 	}
 	
-	resource "aws_s3_bucket" "tfstate_state_bucket" {
-	  bucket = "{{ .Region }}-{{ .Account }}-tfstate-state"
+	lifecycle {
+		prevent_destroy = false
+	}	
+}
 	
-	}
+resource "aws_s3_bucket" "tfstate_state_bucket" {
+  bucket = "{{ .Region }}-{{ .Account }}-tfstate-state"
+	
+}
 	
 	`
 )
@@ -60,4 +60,9 @@ func GetProviderTemplate() string {
 /* Return Backend template */
 func GetBackendTemplate() string {
 	return backendTemplate
+}
+
+/* Return S3 Backend template */
+func GetTfStateRemoteTemplate() string {
+	return tfstateRemoteTemplate
 }
