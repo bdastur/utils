@@ -1,0 +1,8 @@
+[tox]
+envlist = py27
+
+[testenv]
+changedir = tests
+commands = python -m unittest builder_ut
+deps =
+
