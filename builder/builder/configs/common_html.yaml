@@ -1,0 +1,12 @@
+html:
+  element: html
+    children:
+      head:
+        element: head
+        children:
+          stylesheets: [
+            "dummy-1",
+            "dummy-2"
+          ]
+      body:
+        element: head
