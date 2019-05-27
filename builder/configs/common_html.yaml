@@ -9,4 +9,46 @@ html:
             "dummy-2"
           ]
       body:
-        element: head
+        element: body 
+        children:
+          row0:
+            element: div
+            class: row
+            children:
+              col0:
+                element: div
+                class: col-sm-6
+                children:
+                  element: h3
+                  text: "This is a test"
+              col1:
+                element: div
+                class: col-sm-6
+                children:
+                  element: h4
+                  text: "This is h4 test"
+          row1:
+            element: div
+            class: row
+            children:
+              col0:
+                element: div
+                class: col-sm-2
+                children:
+                  element: h2
+                  text: "This is a test"
+              col1:
+                element: div
+                class: col-sm-2
+                children:
+                  element: h4
+                  text: "This is a test"
+          script1:
+            element: script
+            src: "../thirdparty/jquery/jquery-3.3.1.min.js"
+          script2:
+            element: script
+            src: "../thirdparty/bootstrap-3.3.7-dist/js/bootstrap.min.js"
+
+
+
