@@ -1,0 +1,18 @@
+name: str()
+app_type: str()
+app_name: str()
+components:
+    box1:
+        loc:
+          row: int()
+          column: int()
+          column_size: int()
+        type: str()
+    box2:
+        loc:
+            row: int()
+            column: int()
+            column_size: int()
+        type: str()
+
+
