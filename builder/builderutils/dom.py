@@ -25,7 +25,7 @@ class DomManager(object):
             print(tag)
 
         if "children" in root:
-            children = root['children']
+            children = root['children'].keys()
             for child in children:
                 self.parseDomTree(root['children'][child])
         endtag = "</" + root["element"] + ">"
@@ -52,6 +52,36 @@ class DomManager(object):
         return renderedString
 
     @staticmethod
-    def render_h3_element(node):
+    def render_header_element(node):
         renderedString = "<{0}>{1}".format(node["element"], node["text"])
         return renderedString
+
+    @staticmethod
+    def render_h1_element(node):
+        return DomManager.render_header_element(node)
+
+    @staticmethod
+    def render_h2_element(node):
+        return DomManager.render_header_element(node)
+
+    @staticmethod
+    def render_h3_element(node):
+        return DomManager.render_header_element(node)
+
+    @staticmethod
+    def render_h4_element(node):
+        return DomManager.render_header_element(node)
+
+    @staticmethod
+    def render_h5_element(node):
+        return DomManager.render_header_element(node)
+
+    @staticmethod
+    def render_h6_element(node):
+        return DomManager.render_header_element(node)
+
+    @staticmethod
+    def render_script_element(node):
+        renderedString = "<{0} src=\"{1}\">".format(node["element"], node["src"])
+        return renderedString
+

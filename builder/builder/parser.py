@@ -8,18 +8,6 @@ import builderutils.logger as logger
 
 
 
-
-class DataConfigParser(object):
-    """Parse User config"""
-    def __init__(self):
-        blogger = logger.BuilderLogger(name=__name__)
-        self.logger = blogger.logger
-
-        self.builder_config = BuilderConfigParser()
-
-
-
-
 class BuilderConfigParser(object):
     """Parse Builder config
        Builder Config parameters can be specified in
@@ -39,22 +27,33 @@ class BuilderConfigParser(object):
                 "Builder Config %s does not exist", BuilderConfigParser.BUILDER_CONFIG
             )
             return
+
+        # Parse Builder Config.
         self.parsed_config, err = parse_yaml_config(BuilderConfigParser.BUILDER_CONFIG)
         if err != 0:
             self.logger.error("Failed to parse BuilderConfig!")
             return
 
+        dom_config_path = self.parsed_config['dom_config']
+        # Parse dom_config
+        self.dom_config, err = parse_yaml_config(dom_config_path)
+        if err != 0:
+            self.logger.error("Failed to parse Dom config")
+            return
         self.logger.info("BuilderConfig Initialized!")
         self.validate = True
 
     def get_schema(self):
-        return self.parsed_config['schema']
+        return self.parsed_config.get('schema', None)
 
     def get_config_path(self):
         return self.parsed_config['configs_path']
 
     def get_templates_path(self):
         return self.parsed_config['templates_path']
+
+    def get_dom_config(self):
+        return self.dom_config
 
 
 def parse_yaml_config(config_file):
