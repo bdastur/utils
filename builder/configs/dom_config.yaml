@@ -1,54 +1,58 @@
 html:
   element: html
-    children:
-      head:
-        element: head
-        children:
-          stylesheets: [
-            "dummy-1",
-            "dummy-2"
-          ]
-      body:
-        element: body 
-        children:
-          row0:
-            element: div
-            class: row
-            children:
-              col0:
-                element: div
-                class: col-sm-6
-                children:
+  children:
+    head:
+      element: head
+      children:
+        stylesheet-1:
+          element: link
+          href: "../dummy-1.css"
+          rel: stylesheet
+    body:
+      element: body 
+      children:
+        row0:
+          element: div
+          class: row
+          children:
+            col0:
+              element: div
+              class: col-sm-6
+              children:
+                hdr1:
                   element: h3
                   text: "This is a test"
-              col1:
-                element: div
-                class: col-sm-6
-                children:
+            col1:
+              element: div
+              class: col-sm-5
+              children:
+                hdr2:
                   element: h4
                   text: "This is h4 test"
-          row1:
-            element: div
-            class: row
-            children:
-              col0:
-                element: div
-                class: col-sm-2
-                children:
+        row1:
+          element: div
+          class: row
+          children:
+            col0:
+              element: div
+              class: col-sm-2
+              children:
+                hdr1:
                   element: h2
                   text: "This is a test"
-              col1:
-                element: div
-                class: col-sm-2
-                children:
+            col1:
+              element: div
+              class: col-sm-1
+              children:
+                hdr2:
                   element: h4
                   text: "This is a test"
-          script1:
-            element: script
-            src: "../thirdparty/jquery/jquery-3.3.1.min.js"
-          script2:
-            element: script
-            src: "../thirdparty/bootstrap-3.3.7-dist/js/bootstrap.min.js"
+        script1:
+          element: script
+          src: "../thirdparty/jquery/jquery-3.3.1.min.js"
+        script2:
+          element: script
+          src: "../thirdparty/bootstrap-3.3.7-dist/js/bootstrap.min.js"
 
 
 
