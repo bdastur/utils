@@ -10,16 +10,24 @@ class DomManager(object):
         blogger = logger.BuilderLogger(name=__name__)
         self.logger = blogger.logger
 
-        self.domTree = {}
+        self.dom_tree = {}
+        self.rendered_dom = ""
         self.dom_config = dom_config
         self.logger.info("DomMgr Initialized")
 
-    def parseDomTree(self, root):
-        methodName = "render_{0}_element".format(root['element'])
+    def update_rendered_dom(self, value, pretty=True):
+        """Append to the rendered dom"""
+        self.rendered_dom += value
+        if pretty:
+            self.rendered_dom +=  "\n"
+
+    def parse_dom_tree(self, root):
+        method_name = "render_{0}_element".format(root['element'])
         try:
-            renderFunction = getattr(self, methodName)
-            renderedString = renderFunction(root)
-            print(renderedString)
+            render_function = getattr(self, method_name)
+            rendered_string = render_function(root)
+            self.update_rendered_dom(rendered_string)
+            print(rendered_string)
         except AttributeError:
             tag = "<" + root["element"] + ">"
             print(tag)
@@ -27,13 +35,14 @@ class DomManager(object):
         if "children" in root:
             children = root['children'].keys()
             for child in children:
-                self.parseDomTree(root['children'][child])
-        endtag = "</" + root["element"] + ">"
-        print(endtag)
+                self.parse_dom_tree(root['children'][child])
+        end_tag = "</" + root["element"] + ">"
+        print(end_tag)
+        self.update_rendered_dom(end_tag)
 
     @staticmethod
     def render_html_element(node):
-        tag = "<html>"
+        tag = "<!DOCTYPE HTML>\n<html>"
         return tag
 
     @staticmethod
@@ -82,6 +91,14 @@ class DomManager(object):
 
     @staticmethod
     def render_script_element(node):
-        renderedString = "<{0} src=\"{1}\">".format(node["element"], node["src"])
-        return renderedString
+        rendered_string = "<{0} src=\"{1}\">".format(node["element"], node["src"])
+        return rendered_string
 
+
+
+
+
+class JSManager(object):
+    """Manage JS creation"""
+    def __init__(self, builder_config):
+        pass
