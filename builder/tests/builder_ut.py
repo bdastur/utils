@@ -22,9 +22,10 @@ class BuilderUt(unittest.TestCase):
         conf_obj = parser.BuilderConfigParser()
         self.assertEqual(conf_obj.validate, True, "Builder config not initialized correctly")
         dom_config = conf_obj.get_dom_config()
-        self.assertFalse(dom_config == None, "Dom config cannot be empty")
+        self.assertFalse(dom_config is None, "Dom config cannot be empty")
         dom_mgr = dom.DomManager(dom_config)
-        dom_mgr.parseDomTree(dom_config['html'])
+        dom_mgr.parse_dom_tree(dom_config['html'])
+        print("Rendered dom: ", dom_mgr.rendered_dom)
 
     def test_build_staging_path(self):
         print("Test basic")
