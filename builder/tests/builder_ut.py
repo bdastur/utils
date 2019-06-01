@@ -26,6 +26,7 @@ class BuilderUt(unittest.TestCase):
         dom_mgr = dom.DomManager(dom_config)
         dom_mgr.parse_dom_tree(dom_config['html'])
         print("Rendered dom: ", dom_mgr.rendered_dom)
+        dom_mgr.generate_rendered_html()
 
     def test_build_staging_path(self):
         print("Test basic")
