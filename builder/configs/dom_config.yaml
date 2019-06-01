@@ -17,39 +17,49 @@ html:
       children:
         row0:
           element: div
+          id: row0
           class: row
           children:
             col0:
               element: div
+              id: col0
               class: col-sm-6
               children:
                 hdr1:
                   element: h3
+                  id: hdr1
                   text: "This is a test"
             col1:
               element: div
+              id: col1
               class: col-sm-5
               children:
                 hdr2:
                   element: h4
+                  id: hdr2
                   text: "This is h4 test"
         row1:
           element: div
+          id: row1
           class: row
           children:
             col0:
               element: div
+              id: col0
               class: col-sm-2
               children:
                 hdr1:
                   element: h2
+                  id: hdr1
                   text: "This is a test"
             col1:
               element: div
+              id: col1
               class: col-sm-1
               children:
                 hdr2:
                   element: h4
+                  id: hdr1
                   text: "This is a test"
         script1:
           element: script
