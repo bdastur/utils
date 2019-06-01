@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
+import os
 import builderutils.logger as logger
-
+import builder.parser as parser
 
 class DomManager(object):
     """Dom Parser"""
@@ -14,6 +15,30 @@ class DomManager(object):
         self.rendered_dom = ""
         self.dom_config = dom_config
         self.logger.info("DomMgr Initialized")
+
+    def generate_rendered_html(self):
+        """Render html doc"""
+        builder_conf = parser.BuilderConfigParser()
+        staging_dir = builder_conf.get_staging_path()
+        print("Staging path: ", staging_dir)
+        if not os.path.exists(staging_dir):
+            os.mkdir(staging_dir)
+
+        # TODO: We should be getting app name from user config.
+        # For now we can create a default dummy app.
+        app_dir = os.path.join(staging_dir, "dummy")
+        if not os.path.exists(app_dir):
+            os.mkdir(app_dir)
+
+        # TODO: The staging dir format here is that of a flask app
+        # If we want to support other web frameworks we need to handle that
+        html_staging_dir = os.path.join(app_dir, "templates")
+        if not os.path.exists(html_staging_dir):
+            os.mkdir(html_staging_dir)
+
+        html_file = os.path.join(html_staging_dir, "index.html")
+        with open(html_file, 'w') as hfile:
+            hfile.write(self.rendered_dom)
 
     def update_rendered_dom(self, value, pretty=True):
         """Append to the rendered dom"""
