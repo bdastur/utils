@@ -58,6 +58,9 @@ class BuilderConfigParser(object):
     def get_staging_path(self):
         return self.parsed_config['staging_path']
 
+    def get_thirdparty_path(self):
+        return self.parsed_config['thirdparty_path']
+
 
 def parse_yaml_config(config_file):
     """Parse YAML format file """

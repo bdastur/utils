@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import shutil
 import builderutils.logger as logger
 import builder.parser as parser
 
@@ -130,5 +131,31 @@ class DomManager(object):
 
 class JSManager(object):
     """Manage JS creation"""
-    def __init__(self, builder_config):
+    def __init__(self):
         pass
+
+    def generate_thirdparty_staging(self):
+        """Render js static staging"""
+        builder_conf = parser.BuilderConfigParser()
+        staging_dir = builder_conf.get_staging_path()
+        print("Staging path: ", staging_dir)
+        if not os.path.exists(staging_dir):
+            os.mkdir(staging_dir)
+
+        # TODO: We should be getting app name from user config.
+        # For now we can create a default dummy app.
+        app_dir = os.path.join(staging_dir, "dummy")
+        if not os.path.exists(app_dir):
+            os.mkdir(app_dir)
+
+        # Set JS static
+        js_static_dir = os.path.join(app_dir, 'static')
+        if not os.path.exists(js_static_dir):
+            os.mkdir(js_static_dir)
+
+        thirdparty_path = builder_conf.get_thirdparty_path()
+        # Copy thirdyparty files
+        if os.path.exists(js_static_dir):
+            shutil.rmtree(js_static_dir)
+        shutil.copytree(thirdparty_path, js_static_dir)
+
