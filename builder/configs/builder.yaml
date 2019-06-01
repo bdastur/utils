@@ -2,5 +2,6 @@ configs_path: "/etc/builder/configs"
 schema: "/etc/builder/configs/schema.yaml"
 templates_path: "/etc/builder/templates"
 dom_config: "/etc/builder/configs/dom_config.yaml"
+thirdparty_path: "/etc/builder/thirdparty"
 
 staging_path: "/tmp/builder"

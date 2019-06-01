@@ -8,8 +8,12 @@ html:
           element: link
           href: "../dummy-1.css"
           rel: stylesheet
+        stylesheet-2:
+          element: link
+          href: "../static/thirdparty/bootstrap-3.3.7-dist/css/bootstrap.min.css"
+          rel: stylesheet
     body:
-      element: body 
+      element: body
       children:
         row0:
           element: div
@@ -49,10 +53,10 @@ html:
                   text: "This is a test"
         script1:
           element: script
-          src: "../thirdparty/jquery/jquery-3.3.1.min.js"
+          src: "../static/thirdparty/jquery/jquery-3.3.1.min.js"
         script2:
           element: script
-          src: "../thirdparty/bootstrap-3.3.7-dist/js/bootstrap.min.js"
+          src: "../static/thirdparty/bootstrap-3.3.7-dist/js/bootstrap.min.js"
 
 
 

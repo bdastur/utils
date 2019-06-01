@@ -28,6 +28,10 @@ class BuilderUt(unittest.TestCase):
         print("Rendered dom: ", dom_mgr.rendered_dom)
         dom_mgr.generate_rendered_html()
 
+    def test_js_thirdparty_staging(self):
+        js_mgr = dom.JSManager()
+        js_mgr.generate_thirdparty_staging()
+
     def test_build_staging_path(self):
         print("Test basic")
         renderObj = renderer.Renderer()
