@@ -88,7 +88,7 @@ class DomManager(object):
 
     @staticmethod
     def render_div_element(node, indent=0):
-        renderedString = indent * " " +  "<{0} class={1}>".format(node["element"], node["class"])
+        renderedString = indent * " " +  "<{0} class={1} id=\"{2}\">".format(node["element"], node["class"], node["id"])
         return renderedString
 
     @staticmethod
