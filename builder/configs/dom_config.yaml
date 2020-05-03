@@ -23,12 +23,14 @@ html:
             col0:
               element: div
               id: col0
+              vue:
+                event: click
               class: col-sm-6
               children:
                 hdr1:
                   element: h3
                   id: hdr1
-                  text: "This is a test"
+                  text: "This is a test  {{ vue_computed_data }}"
             col1:
               element: div
               id: col1

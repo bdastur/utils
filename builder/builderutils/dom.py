@@ -83,18 +83,27 @@ class DomManager(object):
 
     @staticmethod
     def render_link_element(node, indent=0):
-        renderedString = indent * " " +  "<{0} rel={1} href=\"{2}\">".format(node["element"], node["rel"], node["href"])
-        return renderedString
+        rendered_string = indent * " " +  "<{0} rel={1} href=\"{2}\">".format(node["element"], node["rel"], node["href"])
+        return rendered_string
 
     @staticmethod
     def render_div_element(node, indent=0):
-        renderedString = indent * " " +  "<{0} class={1} id=\"{2}\">".format(node["element"], node["class"], node["id"])
-        return renderedString
+
+        vue_options = ""
+        if 'vue' in node.keys():
+            print("Vue found: ", node['vue'])
+            if 'event' in node['vue'].keys():
+                vue_options += "v-on:{0}=\"{1}_{2}_handler\"".\
+                    format(node['vue']['event'], node['id'], node['vue']['event'] )
+
+        rendered_string = indent * " " +  "<{0} class={1} id=\"{2}\" {3}>".\
+            format(node["element"], node["class"], node["id"], vue_options)
+        return rendered_string
 
     @staticmethod
     def render_header_element(node, indent=0):
-        renderedString = indent * " " + "<{0}>{1}".format(node["element"], node["text"])
-        return renderedString
+        rendered_string = indent * " " + "<{0}>{1}".format(node["element"], node["text"])
+        return rendered_string
 
     @staticmethod
     def render_h1_element(node, indent=0):
