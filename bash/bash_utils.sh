@@ -142,3 +142,84 @@ function test_variableargs ()
         echo "argument: $arg"
     done
 }
+
+############################################################
+# pause_spin
+# Sleep with a spinner
+# Takes the number of seconds to pause/sleep.
+############################################################
+function pause_spin() {
+    local sleep_time=$1
+    counter=$(( $sleep_time * 4 ))
+
+    idx=0
+    i=1
+    sp="/-\|"
+    echo -n ' '
+    while [[ $idx -lt $counter ]]
+    do
+        printf "\b${sp:i++%${#sp}:1}"
+        sleep 0.25
+        idx=$(( $idx + 1 ))
+    done
+    printf "\n"
+}
+
+
+############################################################
+# print_colored:
+# Arguments:
+# 1: message
+# 2: font color
+# 3: newline (just a string actually) '\n' or '\n\n' etc.
+#
+# Colors:
+# default|reset|black: \e[0m
+# red:                 \e[1;31m
+# green:               \e[1;32m
+# yellow:              \e[1;33m
+# blue:                \e[1;34m
+# magenta:             \e[1;35m
+# cyan:                \e[1;36m
+# white:               \e[1;37m
+############################################################
+function print_colored() {
+    local valid_colors=("red" "green" "yellow" "blue" "magenta" "cyan" "white")
+    local msg=$1
+    local color=$2
+    local newline=$3
+    local default_color='\e[0m'
+
+    case "$color" in
+    red)
+        color="\e[1;31m"
+        ;;
+    green)
+        color="\e[1;32m"
+        ;;
+    yellow)
+        color="\e[1;33m"
+        ;;
+    blue)
+        color="\e[1;34m"
+        ;;
+    magenta)
+        color="\e[1;35m"
+        ;;
+    cyan)
+        color="\e[1;36m"
+        ;;
+    white)
+        color="\e[1;37m"
+        ;;
+    options)
+        color="\e[0m"
+        ;;
+    *)
+        color="\e[0m"
+        ;;
+  esac
+
+    printf "${color}${msg}${default_color}${newline}"
+}
+
