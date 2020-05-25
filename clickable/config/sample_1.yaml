@@ -1,0 +1,20 @@
+options:
+    - verbose
+      is_flag: true
+      default: false
+      help: "Enable verbosity"
+      required: false
+
+nodes:
+    evacuate:
+      options:
+          - playbook:
+             type: str
+             required: true  
+
+clusters:
+    create:
+    delete:
+
+
+
