@@ -66,3 +66,7 @@ openstack/python_tools/configs/
 tfbootstrap/bin/*
 tfbootstrap/pkg/*
 **/gopkg.in/*
+
+*.tfstate
+*.tfstate.backup
+.terraform/
