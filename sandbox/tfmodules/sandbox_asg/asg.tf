@@ -7,7 +7,7 @@ variable "asg_depends_on" {
 ###########################################################
 resource "aws_launch_template" "sandbox_lt" {
   depends_on    = [var.asg_depends_on]
-  name          = "sandbox_lt"
+  name_prefix   = "sandbox_lt"
   instance_type = var.instance_type
   image_id      = var.ami_id
 
