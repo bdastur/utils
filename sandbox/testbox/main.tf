@@ -6,6 +6,7 @@ provider "aws" {
 
 
 module "test_sandbox" {
+    #source = "git@github.com:bdastur/utils.git//sandbox/tfmodules/sandbox_vpc"  
     source = "../tfmodules/sandbox_vpc"
 
     # Vpc.
@@ -23,16 +24,20 @@ module "test_sandbox" {
 
 module "sandbox_sg" {
     source = "../tfmodules/sandbox_security_groups"
+    sgrules_depends_on = [module.test_sandbox.sandbox_subnet_az1_id, module.test_sandbox.sandbox_subnet_az2_id]
 
     sandbox_name = var.sandbox_name
     aws_vpc_cidr_block = var.cidr_block
     sandbox_vpc_id = module.test_sandbox.sandbox_vpc_id
+    ssh_port_open = var.ssh_port_open 
+    ssh_cidrs = var.ssh_cidrs
 }
 
 
 module "sandbox_asg1" {
     source = "../tfmodules/sandbox_asg"
     asg_depends_on = [module.test_sandbox.sandbox_vpc_id]
+
     sandbox_name  = var.sandbox_name
     instance_type = var.asg_1["instance_type"]
     ami_id        = var.asg_1["ami_id"]
