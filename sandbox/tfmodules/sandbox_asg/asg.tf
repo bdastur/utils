@@ -21,7 +21,7 @@ resource "aws_launch_template" "sandbox_lt" {
 
   ebs_optimized          = true
   key_name               = var.key_name
-  #vpc_security_group_ids = [aws_security_group.secgroup-ssh-ingress.id]
+  vpc_security_group_ids = var.sandbox_sgrule_ids
 
   lifecycle {
     create_before_destroy = true

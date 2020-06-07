@@ -24,7 +24,7 @@ module "test_sandbox" {
 
 module "sandbox_sg" {
     source = "../tfmodules/sandbox_security_groups"
-    sgrules_depends_on = [module.test_sandbox.sandbox_subnet_az1_id, module.test_sandbox.sandbox_subnet_az2_id]
+    sgrules_depends_on = [module.test_sandbox.sandbox_vpc_id]
 
     sandbox_name = var.sandbox_name
     aws_vpc_cidr_block = var.cidr_block
@@ -36,7 +36,7 @@ module "sandbox_sg" {
 
 module "sandbox_asg1" {
     source = "../tfmodules/sandbox_asg"
-    asg_depends_on = [module.test_sandbox.sandbox_vpc_id]
+    asg_depends_on = [module.test_sandbox.sandbox_vpc_id, module.sandbox_sg.sandbox_sgrules]
 
     sandbox_name  = var.sandbox_name
     instance_type = var.asg_1["instance_type"]
@@ -46,7 +46,7 @@ module "sandbox_asg1" {
     key_name      = var.asg_1["key_name"]
     subnet_az1_id = module.test_sandbox.sandbox_subnet_az1_id
     subnet_az2_id = module.test_sandbox.sandbox_subnet_az2_id
-
+    sandbox_sgrule_ids = module.sandbox_sg.sandbox_sgrules
 }
 
 
