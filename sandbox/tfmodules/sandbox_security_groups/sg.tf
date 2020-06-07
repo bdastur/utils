@@ -1,3 +1,7 @@
+variable "sgrules_depends_on" {
+    description = "Variable to force module to wait for VPC"
+}
+
 resource "aws_security_group" "sandbox_sgrule" {
   name        = "${var.sandbox_name}-secgroup"
   description = "Sandbox Ingress security group"
@@ -11,6 +15,18 @@ resource "aws_security_group" "sandbox_sgrule" {
 #########################################################
 # INGRESS Security group rules
 #########################################################
+resource "aws_security_group_rule" "secgroup_ssh_access" {
+  count       = var.ssh_port_open ? 1 : 0
+  description = "Allow SSH ingress from allowed subnets"
+  type        = "ingress"
+  from_port   = 22
+  to_port     = 22
+  protocol    = "tcp"
+
+  security_group_id = aws_security_group.sandbox_sgrule.id
+  cidr_blocks       = var.ssh_cidrs
+}
+
 
 #########################################################
 # EGRESS Security group rules

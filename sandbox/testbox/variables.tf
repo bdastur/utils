@@ -57,6 +57,16 @@ variable "map_public_ip_on_launch" {
     type = bool
 }
 
+###########################################################
+# Security group Variables.
+###########################################################
+variable "ssh_port_open" {
+    type = bool
+}
+
+variable "ssh_cidrs" {
+    type = list
+}
 
 ###########################################################
 # ASG.
