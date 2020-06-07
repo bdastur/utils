@@ -32,3 +32,6 @@ variable  "subnet_az2_id" {
     type = string
 }
 
+variable "sandbox_sgrule_ids" {
+    type = list
+}
