@@ -21,6 +21,14 @@ module "test_sandbox" {
     map_public_ip_on_launch  = var.map_public_ip_on_launch
 }
 
+module "sandbox_sg" {
+    source = "../tfmodules/sandbox_security_groups"
+
+    sandbox_name = var.sandbox_name
+    aws_vpc_cidr_block = var.cidr_block
+    sandbox_vpc_id = module.test_sandbox.sandbox_vpc_id
+}
+
 
 module "sandbox_asg1" {
     source = "../tfmodules/sandbox_asg"
@@ -35,9 +43,6 @@ module "sandbox_asg1" {
     subnet_az2_id = module.test_sandbox.sandbox_subnet_az2_id
 
 }
-
-
-
 
 
 
