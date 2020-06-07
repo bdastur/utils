@@ -1,3 +1,6 @@
+###########################################################
+# Common Variables
+###########################################################
 variable "credentials_file" {
   type    = string
   default = "$HOME/.aws/credentials"
@@ -11,7 +14,9 @@ variable "region" {
   type    = string
 }
 
+###########################################################
 # VPC Variables.
+###########################################################
 variable "cidr_block" {
     type = string
 }
@@ -32,9 +37,9 @@ variable "tags" {
     type = map
 }
 
+###########################################################
 # Subnet Variables.
-
-# Subnet variables
+###########################################################
 variable "subnet_cidr_blocks" {
     type = list
 }
@@ -46,3 +51,14 @@ variable "subnet_azs" {
 variable "map_public_ip_on_launch" {
     type = bool
 }
+
+
+###########################################################
+# ASG.
+###########################################################
+variable "asg_1" {
+    type = map
+}
+
+
+

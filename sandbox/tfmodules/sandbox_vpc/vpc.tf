@@ -7,7 +7,9 @@ resource "aws_vpc" "sandbox_vpc" {
   enable_dns_support   = var.enable_dns_support
   enable_dns_hostnames = var.enable_dns_hostnames
 
-  tags = var.vpc_tags
+  tags = {
+    Sandbox = var.vpc_tags["sandbox_name"]
+  }
 
 }
 
