@@ -1,3 +1,7 @@
+variable "sandbox_name" {
+    type = string
+}
+
 variable "instance_type" {
     type = string
     default = "t2.small"
@@ -17,6 +21,14 @@ variable "volume_type" {
 }
 
 variable "key_name" {
+    type = string
+}
+
+variable "subnet_az1_id" {
+    type = string
+}
+
+variable  "subnet_az2_id" {
     type = string
 }
 
