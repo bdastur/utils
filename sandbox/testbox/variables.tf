@@ -75,5 +75,9 @@ variable "asg_1" {
     type = map
 }
 
+variable "asg_1_health_check" {
+    type = map
+}
+
 
 
