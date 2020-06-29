@@ -38,10 +38,10 @@ resource "aws_autoscaling_group" "sandbox_asg" {
   name_prefix = "sandbox-asg"
 
   vpc_zone_identifier       = [var.subnet_az1_id, var.subnet_az2_id]
-  min_size                  = 1
-  max_size                  = 1
-  desired_capacity          = 1
-  health_check_grace_period = 300
+  min_size                  = var.min_size
+  max_size                  = var.max_size
+  desired_capacity          = var.desired_capacity
+  health_check_grace_period = var.health_check["grace_period"]
   health_check_type         = "EC2"
   termination_policies      = ["OldestInstance", "OldestLaunchConfiguration"]
   target_group_arns         = [""]

@@ -44,6 +44,11 @@ module "sandbox_asg1" {
     volume_size   = var.asg_1["volume_size"]
     volume_type   = var.asg_1["volume_type"]
     key_name      = var.asg_1["key_name"]
+    min_size      = var.asg_1["min_size"]
+    max_size      = var.asg_1["max_size"]
+    desired_capacity = var.asg_1["desired_capacity"]
+    health_check = var.asg_1_health_check
+
     subnet_az1_id = module.test_sandbox.sandbox_subnet_az1_id
     subnet_az2_id = module.test_sandbox.sandbox_subnet_az2_id
     sandbox_sgrule_ids = module.sandbox_sg.sandbox_sgrules
