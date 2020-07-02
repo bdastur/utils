@@ -12,6 +12,19 @@ resource "aws_security_group" "sandbox_sgrule" {
   }
 }
 
+resource "aws_security_group" "sandbox_sgrule_https_access" {
+  name        = "${var.sandbox_name}-https-secgroup"
+  description = "Sandbox Allow Https access"
+  vpc_id      = var.sandbox_vpc_id
+
+  tags = {
+    Sandbox  = "${var.sandbox_name}"
+    Type     = "IngressHttps"
+  }
+}
+
+
+
 #########################################################
 # INGRESS Security group rules (ssh access)
 #########################################################
@@ -38,8 +51,10 @@ resource "aws_security_group_rule" "secgroup_https_access" {
   to_port     = 443
   protocol    = "tcp"
 
-  security_group_id = aws_security_group.sandbox_sgrule.id
-  cidr_blocks       = var.https_cidrs
+  security_group_id = aws_security_group.sandbox_sgrule_https_access.id
+  #cidr_blocks       = var.https_cidrs
+  cidr_blocks        = slice(var.https_cidrs, 0, min(50, length(var.https_cidrs)))
+  #cidr_blocks       = "slice(var.https_cidrs, 0, min(1, length(var.https_cidrs)))"
 }
 
 

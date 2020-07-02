@@ -68,6 +68,15 @@ variable "ssh_cidrs" {
     type = list
 }
 
+variable "https_port_open" {
+    type = bool
+}
+
+variable "https_cidrs" {
+    type = list
+}
+
+
 ###########################################################
 # ASG.
 ###########################################################
