@@ -1,0 +1,87 @@
+yum install -y unzip wget 
+wget https://releases.hashicorp.com/consul/1.8.0/consul_1.8.0_linux_amd64.zip
+unzip consul_1.8.0_linux_amd64.zip
+
+
+Starting consul agent (Should be running on all nodes)
+./consul  agent -dev -node machine
+
+sudo netstat -anp | grep consul
+tcp        0      0 127.0.0.1:8600          0.0.0.0:*               LISTEN      18839/./consul      
+tcp        0      0 127.0.0.1:8300          0.0.0.0:*               LISTEN      18839/./consul      
+tcp        0      0 127.0.0.1:8301          0.0.0.0:*               LISTEN      18839/./consul      
+tcp        0      0 127.0.0.1:8302          0.0.0.0:*               LISTEN      18839/./consul      
+tcp        0      0 127.0.0.1:8500          0.0.0.0:*               LISTEN      18839/./consul      
+tcp        0      0 127.0.0.1:8502          0.0.0.0:*               LISTEN      18839/./consul      
+tcp        0      0 127.0.0.1:8300          127.0.0.1:55269         ESTABLISHED 18839/./consul      
+tcp        0      0 127.0.0.1:55269         127.0.0.1:8300          ESTABLISHED 18839/./consul      
+udp        0      0 127.0.0.1:8301          0.0.0.0:*                           18839/./consul      
+udp        0      0 127.0.0.1:8302          0.0.0.0:*                           18839/./consul      
+udp        0      0 127.0.0.1:8600          0.0.0.0:*                           18839/./consul      
+
+
+Viewing members
+./consul members 
+./consul members -detailed
+
+using curl:
+curl localhost:8500/v1/catalog/nodes
+
+
+
+$ sudo yum install bind-utils
+dig @127.0.0.1 -p 8600 machine.node.consul
+
+
+Creating Service:
+
+mkdir /etc/consul.d
+echo '{"service": {"name": "web", "tags": ["rails", "xsmall"], "port": 80}}' > /etc/consul.d/web.json
+./consul agent -dev -config-dir /etc/consul.d/ -node machine
+
+dig:
+dig @127.0.0.1 -p 8600 rails.web.service.consul SRV
+
+curl:
+curl http://localhost:8500/v1/catalog/service/web
+
+
+Filtering for only healthy web service:
+curl http://localhost:8500/v1/catalog/service/web?passing
+
+
+Install socat:
+sudo yum install -y socat
+
+Testing basic tcp connection:
+console 1 $ socat -v tcp4-l:8181,fork exec:"/bin/cat"
+
+console2  nc 10.0.0.151 8181
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

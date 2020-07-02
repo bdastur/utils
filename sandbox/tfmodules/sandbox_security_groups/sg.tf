@@ -13,7 +13,7 @@ resource "aws_security_group" "sandbox_sgrule" {
 }
 
 #########################################################
-# INGRESS Security group rules
+# INGRESS Security group rules (ssh access)
 #########################################################
 resource "aws_security_group_rule" "secgroup_ssh_access" {
   count       = var.ssh_port_open ? 1 : 0
@@ -26,6 +26,22 @@ resource "aws_security_group_rule" "secgroup_ssh_access" {
   security_group_id = aws_security_group.sandbox_sgrule.id
   cidr_blocks       = var.ssh_cidrs
 }
+
+#########################################################
+# INGRESS Security group rules (https access)
+#########################################################
+resource "aws_security_group_rule" "secgroup_https_access" {
+  count       = var.https_port_open ? 1 : 0
+  description = "Allow HTTPS ingress from allowed subnets"
+  type        = "ingress"
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+
+  security_group_id = aws_security_group.sandbox_sgrule.id
+  cidr_blocks       = var.https_cidrs
+}
+
 
 
 #########################################################
