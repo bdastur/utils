@@ -11,5 +11,5 @@ output "sandbox_subnet_az2_id" {
 }
 
 output "sandbox_sgrules" {
-    value = module.sandbox_sg.sandbox_sgrules
+    value = [module.sandbox_sg.sandbox_sgrules]
 }

@@ -31,6 +31,8 @@ module "sandbox_sg" {
     sandbox_vpc_id = module.test_sandbox.sandbox_vpc_id
     ssh_port_open = var.ssh_port_open 
     ssh_cidrs = var.ssh_cidrs
+    https_port_open = var.https_port_open
+    https_cidrs = var.https_cidrs
 }
 
 
