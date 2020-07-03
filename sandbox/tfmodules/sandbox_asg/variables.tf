@@ -52,3 +52,7 @@ variable "health_check" {
     type = map
 }
 
+variable "user_tags" {
+  type = list(any)
+  description = "User tags are set by the caller."
+}

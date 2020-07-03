@@ -54,6 +54,8 @@ module "sandbox_asg1" {
     subnet_az1_id = module.test_sandbox.sandbox_subnet_az1_id
     subnet_az2_id = module.test_sandbox.sandbox_subnet_az2_id
     sandbox_sgrule_ids = module.sandbox_sg.sandbox_sgrules
+
+    user_tags = var.asg_1_tags
 }
 
 
