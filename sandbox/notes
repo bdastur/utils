@@ -1,4 +1,7 @@
-yum install -y unzip wget 
+--------------------------------------------------
+
+yum install -y unzip wget bind-utils socat
+
 wget https://releases.hashicorp.com/consul/1.8.0/consul_1.8.0_linux_amd64.zip
 unzip consul_1.8.0_linux_amd64.zip
 

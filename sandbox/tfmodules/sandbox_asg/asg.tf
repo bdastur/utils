@@ -56,11 +56,7 @@ resource "aws_autoscaling_group" "sandbox_asg" {
     create_before_destroy = true
   }
 
-  tag {
-    key                 = "Sandbox"
-    value               = var.sandbox_name
-    propagate_at_launch = true
-  }
+  tags = var.user_tags
 
 }
 
