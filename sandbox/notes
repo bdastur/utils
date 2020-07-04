@@ -61,6 +61,14 @@ console 1 $ socat -v tcp4-l:8181,fork exec:"/bin/cat"
 
 console2  nc 10.0.0.151 8181
 
+Running consul on seperate nodes:
+--------------------------------
+
+node 1
+consul agent -server -bootstrap-expect 1 -node agent-one -bind 10.0.1.238 -data-dir /tmp/consul -config-dir /etc/consul.d 
+
+node 2
+consul agent -node agent-two -bind 10.0.0.249 -enable-script-checks=true -data-dir /tmp/consul -config-dir /etc/consul.d -join 10.0.1.238
 
 
 
