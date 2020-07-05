@@ -76,10 +76,6 @@ variable "https_cidrs" {
     type = list
 }
 
-variable "consul_cidrs" {
-    type = list
-}
-
 
 ###########################################################
 # ASG.

@@ -1,0 +1,52 @@
+{
+    "variables": {
+        "profile": "dev1"
+    },
+    "builders": [{
+        "type": "amazon-ebs",
+        "region": "us-west-2",
+        "source_ami": "ami-0bc06212a56393ee1",
+        "instance_type": "t2.small",
+        "security_group_id": "sg-027ac72ae06f5b742",
+        "subnet_id": "subnet-079c5f0296a2d835b",
+        "ssh_username": "centos",
+        "ami_name": "consul {{timestamp}}",
+        "ami_description": "Consul master image - image pipeline",
+        "force_deregister": true,
+        "force_delete_snapshot": true,
+        "run_tags": {
+            "Name": "pipeline-image-server",
+            "Environment": "dev",
+            "Owner": "Eng",
+            "ApplicationRole": "consul",
+            "Sandbox": "consulbox"
+        },
+        "run_volume_tags": {
+            "Name": "pipeline-image-server",
+            "Environment": "dev",
+            "Owner": "Eng",
+            "ApplicationRole": "consul",
+            "Sandbox": "consulbox"
+        },
+        "tags": {
+            "Name": "consul-image",
+            "Environment": "dev",
+            "Owner": "Eng",
+            "ApplicationRole": "consul",
+            "Sandbox": "consulbox"
+        }
+    }],
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "sudo mkdir /staging",
+                "sudo chmod -R 777 /staging",
+                "sudo yum install -y unzip wget bind-utils socat",
+                "cd /staging && wget https://releases.hashicorp.com/consul/1.8.0/consul_1.8.0_linux_amd64.zip",
+                "cd /staging && unzip consul_1.8.0_linux_amd64.zip && sudo cp consul /usr/local/bin/consul",
+                "consul version"
+            ]
+        }
+    ]
+}

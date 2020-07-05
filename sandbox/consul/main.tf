@@ -44,12 +44,23 @@ module "sandbox_sg_https_access" {
     https_cidrs = var.https_cidrs
 }
 
+module "sandbox_sg_consul_access" {
+    source = "../tfmodules/sandbox_security_groups/consul_access"
+    sgrules_depends_on = [module.test_sandbox.sandbox_vpc_id]
+
+    sandbox_name = var.sandbox_name
+    aws_vpc_cidr_block = var.cidr_block
+    sandbox_vpc_id = module.test_sandbox.sandbox_vpc_id
+    consul_cidrs = var.consul_cidrs
+}
+
 
 module "sandbox_asg1" {
     source = "../tfmodules/sandbox_asg"
     asg_depends_on = [module.test_sandbox.sandbox_vpc_id, 
                       module.sandbox_sg_ssh_access.sandbox_sgrules,
-                      module.sandbox_sg_https_access.sandbox_sgrules]
+                      module.sandbox_sg_https_access.sandbox_sgrules,
+                      module.sandbox_sg_consul_access.sandbox_sgrules]
 
     sandbox_name  = var.sandbox_name
     instance_type = var.asg_1["instance_type"]
