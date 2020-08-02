@@ -70,3 +70,5 @@ tfbootstrap/pkg/*
 *.tfstate
 *.tfstate.backup
 .terraform/
+
+**/bin/
