@@ -21,7 +21,8 @@ func TerraglotCommand() *cobra.Command {
 }
 
 
-func runHelp(cmd *cobra.Command, args []string( {
+func runHelp(cmd *cobra.Command, args []string) {
+    fmt.Println("Run help called")
     cmd.Help()
 }
 
