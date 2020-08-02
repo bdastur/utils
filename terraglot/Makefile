@@ -1,5 +1,8 @@
 ###############################################
 # Terraglot Makefile
+# To run make in debug mode use --just-print flag.
+# Example:
+#   $make --just-print gocyclo
 ###############################################
 
 BUILD_USER := 2111
@@ -19,11 +22,13 @@ CYCLOMATIC_COMPLEXITY := 10
 
 help:
 	@echo "======================================="
-	@echo "Terra glot make."
+	@echo "Terraglot make."
+	@echo ""
 	@echo "options: "
 	@echo "---------"
 	@echo "make pullimage : Pull the go agent image"
 	@echo "make build     : Build the terraglot binary"
+	@echo "make gocyclo   : Calculate cyclomatic complexity"
 
 pullimage:
 	@echo "Pulling $(BUILD_IMAGE)"
