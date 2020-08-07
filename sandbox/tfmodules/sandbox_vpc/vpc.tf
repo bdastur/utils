@@ -23,8 +23,8 @@ resource "aws_subnet" "az1" {
   map_public_ip_on_launch = var.map_public_ip_on_launch
 
   tags = {
-    Name  = "brdtest101-subnet-1"
-    Stack = "teststack"
+    Name  = join("-", [var.vpc_tags["sandbox_name"], "az-1"])
+    Stack = "envbase"
   }
 }
 
@@ -35,8 +35,8 @@ resource "aws_subnet" "az2" {
   map_public_ip_on_launch = var.map_public_ip_on_launch
 
   tags = {
-    Name  = "brdtest101-subnet-2"
-    Stack = "teststack"
+    Name  = join("-", [var.vpc_tags["sandbox_name"], "az-2"])
+    Stack = "envbase"
   }
 }
 
@@ -47,8 +47,8 @@ resource "aws_internet_gateway" "internet_gw" {
   vpc_id = aws_vpc.sandbox_vpc.id
 
   tags = {
-    Name  = "brdtest101-igw"
-    Stack = "teststack"
+    Name  = join("-", [var.vpc_tags["sandbox_name"], "igw"])
+    Stack = "envbase"
   }
 }
 
@@ -64,8 +64,8 @@ resource "aws_route_table" "rtable" {
   }
 
   tags = {
-    Name  = "brdtest101-rtable"
-    Stack = "teststack"
+    Name  = join("-", [var.vpc_tags["sandbox_name"], "rtable"])
+    Stack = "envbase"
   }
 }
 
