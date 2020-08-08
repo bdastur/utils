@@ -4,6 +4,18 @@ provider "aws" {
   profile                 = var.profile
 }
 
+/*
+ Backend in custom_backend.tff
+terraform {
+  backend "s3" {
+    bucket = "us-west-2-xxxx"
+    key    = "sbox/envbase/sbox.tfstate"
+    region = "us-west-2"
+    profile = "dev1"
+  }
+}
+*/
+
 
 module "test_sandbox" {
     #source = "git@github.com:bdastur/utils.git//sandbox/tfmodules/sandbox_vpc"

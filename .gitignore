@@ -72,5 +72,6 @@ tfbootstrap/pkg/*
 .terraform/
 
 custom_security_groups.auto.tfvars.json
+custom_*.tf
 
 **/bin/
