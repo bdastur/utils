@@ -7,33 +7,33 @@
         "region": "us-west-2",
         "source_ami": "ami-0bc06212a56393ee1",
         "instance_type": "t2.small",
-        "security_group_id": "sg-027ac72ae06f5b742",
-        "subnet_id": "subnet-079c5f0296a2d835b",
+        "security_group_id": "{{ user `securitygroup_id` }}",
+        "subnet_id": "{{ user `subnet_id` }}",
         "ssh_username": "centos",
         "ami_name": "consul {{timestamp}}",
         "ami_description": "Consul master image - image pipeline",
         "force_deregister": true,
         "force_delete_snapshot": true,
         "run_tags": {
-            "Name": "pipeline-image-server",
-            "Environment": "dev",
-            "Owner": "Eng",
-            "ApplicationRole": "consul",
-            "Sandbox": "consulbox"
+            "Name": "{{ user `tag-name` }}",
+            "Environment": "{{ user `tag-environment` }}",
+            "Owner": "{{ user `tag-owner`}}",
+            "ApplicationRole": "{{ user `tag-application-role` }}",
+            "Sandbox": "{{ user `tag-sandbox` }}"
         },
         "run_volume_tags": {
-            "Name": "pipeline-image-server",
-            "Environment": "dev",
-            "Owner": "Eng",
-            "ApplicationRole": "consul",
-            "Sandbox": "consulbox"
+            "Name": "{{ user `tag-name` }}",
+            "Environment": "{{ user `tag-environment` }}",
+            "Owner": "{{ user `tag-owner`}}",
+            "ApplicationRole": "{{ user `tag-application-role` }}",
+            "Sandbox": "{{ user `tag-sandbox` }}"
         },
         "tags": {
-            "Name": "consul-image",
-            "Environment": "dev",
-            "Owner": "Eng",
-            "ApplicationRole": "consul",
-            "Sandbox": "consulbox"
+            "Name": "{{ user `tag-name` }}",
+            "Environment": "{{ user `tag-environment` }}",
+            "Owner": "{{ user `tag-owner`}}",
+            "ApplicationRole": "{{ user `tag-application-role` }}",
+            "Sandbox": "{{ user `tag-sandbox` }}"
         }
     }],
     "provisioners": [
