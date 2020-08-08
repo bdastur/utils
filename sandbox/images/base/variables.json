@@ -1,0 +1,12 @@
+{
+    "securitygroup_id": "sg-055cc3ef1d8a67370",
+    "subnet_id": "subnet-0b3bcffd4d28dcc0f",
+    "tag-name": "baseimage",
+    "tag-environment": "dev",
+    "tag-owner": "Eng",
+    "tag-sandbox": "sandbox1",
+    "tag-application-role": "base"
+}
+
+
+
