@@ -21,7 +21,7 @@ $ pwd
 $ tail -f master/twistd.log 
 
 
-ssh -L 8010:localhost:8010 -i ~/.ssh/scylladev1 centos@xx.xxx.xx.xxx
+ssh -L 8010:localhost:8010 -i ~/.ssh/dev1 centos@xx.xxx.xx.xxx
 
 
 Buildbot worker:
