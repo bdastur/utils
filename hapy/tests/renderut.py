@@ -15,7 +15,7 @@ class RenderUt(unittest.TestCase):
         rendered_string = renderobj.render_j2_template_string(template_string, **obj)
         print("Rendered strin: ", rendered_string)
 
-    def test_string_render(self):
+    def test_string_render_nested(self):
         renderobj = render.Render()
         
         template_string = """
