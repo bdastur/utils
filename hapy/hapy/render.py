@@ -38,8 +38,8 @@ class Render(object):
     def render_j2_template_string(self, templateString, **kwargs):
         """ one line description
 
-        :template-string:  A Jinja2 template (type: string)
-        :**kwargs:         key-value paris (substitue key/value in template
+        :param template-string:  A Jinja2 template (type: string)
+        :param **kwargs:         key-value paris (substitue key/value in template
 
         :returns:          Rendered string
         """
