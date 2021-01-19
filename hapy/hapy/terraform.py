@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-
+from loguru import logger
+import hapy.command as command
 
 
 class Terraform(object):
@@ -10,18 +10,59 @@ class Terraform(object):
     Manage interactions with Terraform Hashicorp
     """
     def __init__(self, 
-                 terraform_binary_path=None,
-                 working_dir=None,
-                 var_file=None):
+                 terraform_binary_path='terraform',
+                 working_dir=None):
         """
         Initialize
         """
-        pass
+        self.terraform_binary_path = terraform_binary_path
+        self.working_dir = working_dir
 
-    def __set_default_options(self):
-        pass
+        self.validated = True
+        if not self.__terraform_binary_is_valid():
+            self.validated = False
 
-    def init(self, **kwargs):
+    def __terraform_binary_is_valid(self):
+        cmd = "%s version" % self.terraform_binary_path
+        cmdobj = command.Command()
+        ret, version = cmdobj.execute(cmd, popen=False)
+        if ret !=0:
+            logger.error("Terraform binary {} is not valid", 
+                         self.terraform_binary_path)
+            return False
+
+        return True
+
+    def generate_command_string(self, operation, *args, **kwargs):
+        """
+        Set default options to pass to terraform command.
+        """
+        cmd = [self.terraform_binary_path, operation]
+
+        for key, value in kwargs.items():
+            if key == "var":
+                for varkey, varval in value.items():
+                    option = "-var="
+                    option += "'%s=%s'" % (varkey, varval)
+                    cmd.append(option)
+            else:
+                option = ""
+                if "_" in key:
+                    key = key.replace("_", "-")
+
+                if value == "IsFlag":
+                    option = "-%s" % key
+                else:
+                    option = "-%s=%s" % (key, value)
+                cmd.append(option)
+
+        if len(args) > 0:
+            for arg in args:
+                cmd.append(arg)
+
+        return " ".join(cmd)
+
+    def init(self, *args, **kwargs):
         """
         Initialize a new or existing Terraform working directory
         [`terraform init -h` For detailes]
@@ -44,9 +85,12 @@ class Terraform(object):
         :param verify_plugins
 
         """
-        pass
+        cmd_str = self.generate_command_string("init", *args, **kwargs)
+        print(cmd_str)
 
     def plan(self):
+        """
+        """
         pass
 
     def apply(self):
