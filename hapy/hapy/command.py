@@ -4,6 +4,7 @@
 '''
 Command Handler:
 '''
+from loguru import logger
 import sys
 import subprocess
 
@@ -16,6 +17,14 @@ class Command(object):
         pass
 
     def execute(self, cmd, cwd=None, env=None, popen=False):
+        """
+        :param cmd Command String
+        :param cwd Current working dir (Default: None)
+        :param env Environment Variables (Default: None)
+        :param popen Flag - Use subprocess Popen or check_output (Default: False)
+
+        :return (return code, output)
+        """
         if popen:
             cmdoutput = ""
             sproc = subprocess.Popen(cmd,
@@ -33,9 +42,10 @@ class Command(object):
                 sys.stdout.write(nextline)
                 sys.stdout.flush()
 
-            return 0, cmdoutput
+            return sproc.returncode, cmdoutput
 
         try:
+            cmd = cmd.split(" ")
             cmdoutput = subprocess.check_output(cmd,
                                                 cwd=cwd,
                                                 stderr=subprocess.STDOUT,
@@ -43,9 +53,12 @@ class Command(object):
                                                 env=env)
 
         except subprocess.CalledProcessError as err:
-            self.slog.logger.error("Failed to execut %s. Err %s",
-                                   cmd, err)
-            return 1, ""
+            logger.error("Failed to execute{}. Err {}", cmd, err)
+            return err.returncode, ""
+
+        except FileNotFoundError as err:
+            logger.error("File Not Found {}", err)
+            return 127, ""
 
         cmdoutput = cmdoutput.decode("utf-8")
 
