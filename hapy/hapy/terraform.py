@@ -99,7 +99,16 @@ class Terraform(object):
     def destroy(self):
         pass
 
-    def render(self):
-        pass
+    def render(self, **kwargs):
+        """
+        NOTE!!This subcommand is not part of Terraform.!!NOTE
+        This API takes a template string or file and renders the
+        untemplated version
+        """
+        template_file = kwargs.get("template_file", None)
+        search_path = kwargs.get("search_path", None)
+        template_string = kwargs.get("template_string", None)
+        destination_file = kwargs.get("destination_file", None)
+        render_obj = kwargs.get("render_obj", None)
 
 
