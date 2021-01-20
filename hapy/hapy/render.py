@@ -63,10 +63,17 @@ class Render(object):
         for filename in template_files:
             src_file_path = os.path.join(templateDir, filename)
 
-            filename = os.path.splitext(filename)[0]
+            (filename_tmp, ext_type) = os.path.splitext(filename)
+
+            # Simply copy the non-template files
+            if ext_type != ".j2":
+                dest_file_path = os.path.join(destDir, filename)
+                shutil.copyfile(src_file_path, dest_file_path)
+                continue
+
             if ext is not None:
-                filename += ".%s" % ext
-            dest_file_path = os.path.join(destDir, filename)
+                filename_tmp += ".%s" % ext
+            dest_file_path = os.path.join(destDir, filename_tmp)
 
             rendered_data = self.render_j2_template_file(src_file_path,
                                                          ".",

@@ -1,0 +1,19 @@
+provider "aws" {
+  region                  = var.region
+  shared_credentials_file = var.credentials_file
+  profile                 = var.profile
+}
+
+
+terraform {
+  required_version = ">= v0.11.7"
+    backend "{{ backend.type }}" {
+      region     = "{{ backend.region }}"
+      profile    = "{{ backend.profile }}"
+      bucket     = "{{ backend.bucket }}"
+      key        = "{{ backend.key }}"
+      encrypt    = "{{ backend.encrypt }}"
+      acl        = "{{ backend.acl|default("bucket-owner-full-control", true) }}"
+    }
+}
+

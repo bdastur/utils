@@ -9,14 +9,16 @@ class Terraform(object):
     """
     Manage interactions with Terraform Hashicorp
     """
-    def __init__(self, 
+    def __init__(self,
                  terraform_binary_path='terraform',
-                 working_dir=None):
+                 working_dir=None,
+                 environment=None):
         """
         Initialize
         """
         self.terraform_binary_path = terraform_binary_path
         self.working_dir = working_dir
+        self.environment = environment
 
         self.validated = True
         if not self.__terraform_binary_is_valid():
@@ -27,7 +29,7 @@ class Terraform(object):
         cmdobj = command.Command()
         ret, version = cmdobj.execute(cmd, popen=False)
         if ret !=0:
-            logger.error("Terraform binary {} is not valid", 
+            logger.error("Terraform binary {} is not valid",
                          self.terraform_binary_path)
             return False
 
@@ -70,7 +72,7 @@ class Terraform(object):
         :param backend: Configure a backend for this configuration (bool)
         :type  bool
 
-        :param backend_config 
+        :param backend_config
         :param force_copy
         :param from_module
         :param get
@@ -86,7 +88,16 @@ class Terraform(object):
 
         """
         cmd_str = self.generate_command_string("init", *args, **kwargs)
-        print(cmd_str)
+
+        stage_dir = None
+
+        cmdobj = command.Command()
+        ret, output = cmdobj.execute(cmd_str,
+                                     cwd=self.working_dir,
+                                     env=self.environment, popen=True)
+        if ret != 0:
+            print("Terraform init failed")
+
 
     def plan(self):
         """
