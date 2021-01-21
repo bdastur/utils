@@ -98,14 +98,74 @@ class Terraform(object):
         if ret != 0:
             print("Terraform init failed")
 
+        return ret, output
 
-    def plan(self):
+    def plan(self, *args, **kwargs):
         """
-        """
-        pass
+        Usage: terraform plan [options] [DIR]
+        Generates an execution plan for Terraform.
+        [`terraform plan -h` For detailes]
 
-    def apply(self):
-        pass
+
+        Options:
+        :param compact_warnings
+        :param destroy
+        :param detailed_exitcode
+        :param input
+        :param lock
+        :param lock_timeout
+        :param no_color
+        :param out
+        :param parallelism
+        :param refresh
+        :param state
+        :param target
+        :param var
+        :param var_file
+        """
+        cmd_str = self.generate_command_string("plan", *args, **kwargs)
+        cmdobj = command.Command()
+        ret, output = cmdobj.execute(cmd_str,
+                                      cwd=self.working_dir,
+                                      env=self.environment, popen=True)
+        if ret != 0:
+            print("Terraform plan failed")
+
+        return ret, output
+
+    def apply(self, *args, **kwargs):
+        """
+        Usage: terraform apply [options] [DIR-OR-PLAN]
+        [`terraform apply -h` For detailes]
+
+        Builds or changes infrastructure according to Terraform configuration
+        files in DIR.
+
+        Options:
+        :param auto_approve
+        :param backup
+        :param compact_warnings
+        :param lock
+        :param lock_timeout
+        :param input
+        :param no-color
+        :param parallelism
+        :param refresh
+        :param state
+        :param state-out
+        :param target
+        :param var
+        :param var_file
+        """
+        cmd_str = self.generate_command_string("apply", *args, **kwargs)
+        cmdobj = command.Command()
+        ret, output = cmdobj.execute(cmd_str,
+                                      cwd=self.working_dir,
+                                      env=self.environment, popen=True)
+        if ret != 0:
+            print("Terraform plan failed")
+
+        return ret, output
 
     def destroy(self):
         pass

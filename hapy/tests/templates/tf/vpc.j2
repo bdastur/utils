@@ -1,0 +1,31 @@
+###########################################################
+# VPC  {{ vpc_name|default("sandbo_vpc", true) }}
+###########################################################
+resource "aws_vpc" "{{ vpc_name|default('sandbox_vpc', true)  }}" {
+  cidr_block           = var.cidr_block
+  instance_tenancy     = var.instance_tenancy
+  enable_dns_support   = var.enable_dns_support
+  enable_dns_hostnames = var.enable_dns_hostnames
+
+  tags = {
+    Sandbox = var.tags["sandbox_name"]
+  }
+}
+
+
+
+###########################################################
+# Sandbox Subnets
+###########################################################
+resource "aws_subnet" "az1" {
+  vpc_id                  = aws_vpc.sandbox_vpc.id
+  cidr_block              = var.subnet_cidr_blocks[0]
+  availability_zone       = var.subnet_azs[0]
+  map_public_ip_on_launch = var.map_public_ip_on_launch
+
+  tags = {
+    Name  = join("-", [var.tags["sandbox_name"], "az-1"])
+    Stack = var.tags["Stack"]
+  }
+}
+

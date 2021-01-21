@@ -83,4 +83,6 @@ class TerraformUt(unittest.TestCase):
 
         args = [stage_dir]
         tfobj.init(*args)
+        tfobj.plan(*args)
+        tfobj.apply(*args, auto_approve="IsFlag")
 
