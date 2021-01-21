@@ -4,6 +4,8 @@
 import os
 import unittest
 import hapy.terraform as terraform
+import hapy.render as render
+import hapy.command as command
 
 
 class TerraformUt(unittest.TestCase):
@@ -52,4 +54,33 @@ class TerraformUt(unittest.TestCase):
                                             force_copy='IsFlag',
                                             var={'foo': 'bar'})
         print("cmd: ", cmd)
+
+
+    def test_terraform_render_init(self):
+        templates_dir = "./templates/tf"
+        stage_dir = "/tmp/tftestdir"
+        obj = {
+            "region": "us-west-2",
+            "profile": "dev1",
+            "backend": {
+                "type": "s3",
+                "region": "us-west-2",
+                "profile": "dev1",
+                "bucket": "dev1-temp",
+                "key": "tfstates/testdir/testdir.tfstate",
+                "encrypt": "true",
+                "acl": "bucket-owner-full-control"
+            }
+        }
+        renderobj = render.Render()
+        ret = renderobj.render_j2_template_dir(
+            templates_dir, stage_dir, ext="tf", **obj)
+        self.assertEqual(ret, 0, msg="Expected 0, got %d % ret")
+
+        tfbinary = "terraform12"
+        tfobj = terraform.Terraform(terraform_binary_path=tfbinary, 
+                                    working_dir=stage_dir)
+
+        args = [stage_dir]
+        tfobj.init(*args)
 
