@@ -70,6 +70,7 @@ tfbootstrap/pkg/*
 *.tfstate
 *.tfstate.backup
 .terraform/
+.terraform.lock.hcl
 
 custom_security**
 custom_security_groups.auto.tfvars.json
