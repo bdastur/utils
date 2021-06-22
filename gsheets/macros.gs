@@ -110,6 +110,47 @@ function readEntryForm() {
 
 function populatePlanningSheet(taskName) {
   console.log("Populate main planning sheet " + taskName);
+  var sheetName = "main-planning-sheet"
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+  var mainSheet = spreadsheet.getSheetByName(sheetName);
+  console.log("Option sheet name: " + mainSheet.getSheetName());
+  var range = mainSheet.getDataRange();
+  var values = range.getValues();
+
+  var rowString = ""
+  var rowId = 1;
+  var startRowId = 6;
+  var columnId = 1
+  var tasklist = [];
+  for (var row in values) {
+    var taskObj = {};
+    if (rowId < startRowId) {
+      rowId = rowId + 1;
+      continue;
+    }
+    rowString = "Row: " + rowId + " : ";
+    var columnId = 1;
+    taskObj['description'] = values[row][2];
+    taskObj['category'] = values[row][3];
+    taskObj['owner'] = values[row][4];
+    console.log("HERE: " + values[row][2]);
+
+    // for (var column in values[row]) {
+    //   var cellValue = values[row][column]
+    //   if (cellValue) {
+    //     rowString = rowString + "COl: " + columnId + " : "+ values[row][column]
+    //   } 
+      
+    //   rowString = rowString + ",";
+    //   columnId = columnId + 1;
+    // }
+    tasklist.push(taskObj)
+    Logger.log(rowString); 
+    rowId = rowId + 1;
+  }
+
+  console.log("Task list: " + JSON.stringify(tasklist));
+
 }
 
 
