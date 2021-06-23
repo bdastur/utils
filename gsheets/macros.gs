@@ -105,10 +105,10 @@ function readEntryForm() {
   var entryString = "Taskname: " + taskName + ", Description: " + taskDescription + ", Category: " + taskCategory 
       + ", duration: " + taskEstimatedDuration
   console.log("Data entries: " + entryString);
-  populatePlanningSheet(taskName);
+  populatePlanningSheet(taskName, taskDescription, taskCategory, taskEstimatedDuration, taskStartDate, taskPriority, taskOwner);
 }
 
-function populatePlanningSheet(taskName) {
+function populatePlanningSheet(taskName, taskDescription, taskCategory, taskEstimatedDuration, taskStartDate, taskPriority, taskOwner) {
   console.log("Populate main planning sheet " + taskName);
   var sheetName = "main-planning-sheet"
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
@@ -130,27 +130,28 @@ function populatePlanningSheet(taskName) {
     }
     rowString = "Row: " + rowId + " : ";
     var columnId = 1;
+    if (! values[row][2]) {
+      continue;
+    }
     taskObj['description'] = values[row][2];
     taskObj['category'] = values[row][3];
     taskObj['owner'] = values[row][4];
     console.log("HERE: " + values[row][2]);
 
-    // for (var column in values[row]) {
-    //   var cellValue = values[row][column]
-    //   if (cellValue) {
-    //     rowString = rowString + "COl: " + columnId + " : "+ values[row][column]
-    //   } 
-      
-    //   rowString = rowString + ",";
-    //   columnId = columnId + 1;
-    // }
+   
     tasklist.push(taskObj)
     Logger.log(rowString); 
     rowId = rowId + 1;
   }
+  console.log("Row ID: " + rowId);
+  mainSheet.getRange(rowId, 3).setValue(taskDescription);
+  mainSheet.getRange(rowId, 4).setValue(taskCategory);
+  mainSheet.getRange(rowId, 5).setValue(taskOwner);
+  var rowRange = "C" + rowId + ":" + "E" + rowId;
+  console.log("Range row: " + rowRange);
+  mainSheet.getRange(rowRange).setBackgroundRGB(222, 233, 253);
 
   console.log("Task list: " + JSON.stringify(tasklist));
 
 }
-
 
